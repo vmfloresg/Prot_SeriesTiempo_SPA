@@ -1,0 +1,314 @@
+:root{
+  --brand: #0d6efd;
+  --muted: #6c757d;
+}
+body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:#f6f8fa; margin:0; }
+.login-card { border-radius:12px; }
+.avatar-circle {
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, var(--brand), #5b9cff);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.avatar-circle svg { width: 34px; height: 34px; }
+
+/* Floating Sidebar con animación suave */
+.floating-sidebar {
+  position: fixed;
+  top: 70px;
+  left: 20px;
+  bottom: 20px;
+  width: 260px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06);
+  z-index: 1020;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease, visibility 0.35s ease;
+  overflow: hidden;
+  opacity: 1;
+  visibility: visible;
+}
+.floating-sidebar.closed {
+  transform: translateX(-320px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.floating-sidebar.hidden-by-scroll {
+  transform: translateY(-120%);
+  opacity: 0;
+}
+.sidebar-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+.sidebar-header {
+  padding: 0 4px 8px 4px;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.sidebar-nav .nav-link {
+  color: #495057;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin: 0.25rem 0;
+  display: flex; align-items: center;
+  transition: background .15s ease, color .15s ease;
+}
+.sidebar-nav .nav-link:hover {
+  background: #f1f5f9;
+  color: var(--brand);
+}
+.sidebar-nav .nav-link.active {
+  background: #e7f1ff;
+  color: var(--brand);
+  font-weight: 600;
+}
+.sidebar-nav .nav-link i { font-size: 1.1rem; }
+
+/* Overlay para móvil */
+.sidebar-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 1019;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .3s ease, visibility .3s ease;
+}
+.sidebar-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Content wrapper */
+.content-wrapper {
+  margin-left: 0;
+  transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (min-width: 992px) {
+  .content-wrapper {
+    margin-left: 280px;
+  }
+  .floating-sidebar {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  .floating-sidebar.closed {
+    transform: translateX(-320px);
+  }
+}
+
+.dropzone { background: linear-gradient(180deg,#ffffff,#fbfdff); transition: box-shadow .15s ease, transform .08s ease; cursor:pointer; }
+.dropzone.hover { box-shadow: 0 6px 20px rgba(13,110,253,0.12); transform: translateY(-3px); border-color: rgba(13,110,253,0.25); }
+.app-view { margin-top: 8px; }
+#fileList li { display:flex; justify-content:space-between; align-items:center; padding:0.5rem 0; }
+
+/* Shake animation */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+.card.shake { animation: shake 0.25s ease-in-out; }
+
+
+/* ========== ESTILOS PÁGINA DE INICIO ========== */
+
+/* Hero Section */
+.display-4 {
+  font-size: 2.8rem;
+  line-height: 1.2;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.app-view {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Stats Cards */
+.stats-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stats-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+}
+
+.stats-card .card-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #6c757d;
+}
+
+/* Feature Cards */
+.feature-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+}
+
+.feature-icon {
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(13, 110, 253, 0.1);
+  border-radius: 50%;
+  margin: 0 auto;
+}
+
+.feature-card .card-title {
+  font-weight: 700;
+}
+
+.feature-card .card-text {
+  font-size: 0.95rem;
+}
+
+/* Workflow Steps */
+.workflow-step {
+  position: relative;
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #0d6efd, #5b9cff);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin: 0 auto 15px;
+  box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
+}
+
+.workflow-step h6 {
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .display-4 {
+    font-size: 2rem;
+  }
+  
+  .col-md-1 {
+    display: none;
+  }
+  
+  .step-number {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+  
+  .feature-icon {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+@media (max-width: 576px) {
+  .display-4 {
+    font-size: 1.6rem;
+  }
+  
+  .lead {
+    font-size: 1rem;
+  }
+}
+
+/* ========== ESTILOS BITÁCORA ========== */
+
+.bitacora-item {
+  border-left: 4px solid;
+  transition: background 0.2s ease;
+}
+
+.bitacora-item:hover {
+  background: #f8f9fa;
+}
+
+.bitacora-success {
+  border-left-color: #198754;
+  background: rgba(25, 135, 84, 0.05);
+}
+
+.bitacora-error {
+  border-left-color: #dc3545;
+  background: rgba(220, 53, 69, 0.05);
+}
+
+.bitacora-warning {
+  border-left-color: #ffc107;
+  background: rgba(255, 193, 7, 0.05);
+}
+
+.bitacora-info {
+  border-left-color: #0d6efd;
+  background: rgba(13, 110, 253, 0.05);
+}
+
+
+
+/* ========== ESTILOS PERMISOS DevExpress ========== */
+
+.perm-permiso {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.perm-todos {
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  accent-color: #0d6efd;
+}
+
+.table-permisos th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.table-permisos td {
+  vertical-align: middle;
+}
+
+/* Iconos de permisos */
+.perm-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.perm-R { background: rgba(13, 110, 253, 0.1); color: #0d6efd; }
+.perm-W { background: rgba(25, 135, 84, 0.1); color: #198754; }
+.perm-Q { background: rgba(13, 202, 240, 0.1); color: #0dcaf0; }

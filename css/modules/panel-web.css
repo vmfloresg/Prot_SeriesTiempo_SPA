@@ -1,0 +1,186 @@
+/* CSS del módulo Panel Web - aislado para evitar conflictos con Proyecto 1 */
+#panel-web .sidebar .nav-link {
+    color: #9ca3af;
+    font-weight: 500;
+}#panel-web .sidebar .nav-link.active,
+#panel-web .sidebar .nav-link:hover {
+    color: #f9fafb;
+    background: #1f2937;
+}#panel-web .card-modern {
+    border-radius: 1rem;
+    border: none;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+}#panel-web .card-modern .card-header {
+    border-bottom: 1px solid #e5e7eb;
+    background: #ffffff;
+    border-radius: 1rem 1rem 0 0;
+}#panel-web /* Drag & Drop */
+.drop-area {
+    border: 2px dashed #9ca3af;
+    border-radius: 0.75rem;
+    padding: 2rem;
+    text-align: center;
+    color: #6b7280;
+    background: #f9fafb;
+    transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.1s ease;
+}#panel-web .drop-area.highlight {
+    border-color: #2563eb;
+    background-color: #eff6ff;
+    transform: scale(1.01);
+}#panel-web .file-list {
+    margin-top: 1rem;
+}#panel-web .file-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    background: #f3f4f6;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}#panel-web .file-list-item span {
+    word-break: break-all;
+}#panel-web .tab-container {
+    margin-top: 1rem;
+}#panel-web .check-verde {
+    accent-color: #198754;
+}#panel-web .check-verde {
+    accent-color: #198754;
+}#panel-web /* Para estilo de check  */
+
+#modalCuadros .estado-checkbox {
+    width: 1.15rem;
+    height: 1.15rem;
+    border: 1px solid #198754;
+    border-radius: 0.25rem;
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: #fff;
+    position: relative;
+    cursor: default;
+}#panel-web #modalCuadros .estado-checkbox:checked {
+    background-color: #198754;
+    border-color: #198754;
+}#panel-web #modalCuadros .estado-checkbox:checked::after {
+    content: "";
+    position: absolute;
+    left: 0.32rem;
+    top: 0.08rem;
+    width: 0.28rem;
+    height: 0.58rem;
+    border: solid #fff;
+    border-width: 0 0.18rem 0.18rem 0;
+    transform: rotate(45deg);
+}#panel-web #modalCuadros .estado-checkbox:disabled {
+    opacity: 1;
+}#panel-web .sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.85);
+    border-radius: 0.5rem;
+    margin-bottom: 0.35rem;
+}#panel-web .sidebar .nav-link.active,
+#panel-web .sidebar .nav-link:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+}#panel-web .card-modern {
+    border: 0;
+    border-radius: 1rem;
+    box-shadow: 0 0.25rem 1rem rgba(15, 23, 42, 0.08);
+}#panel-web .card-header {
+    background: #fff;
+    border-bottom: 1px solid #eef2f7;
+    border-top-left-radius: 1rem !important;
+    border-top-right-radius: 1rem !important;
+    /*background-color: #ffffff;*/
+    /* Aumenta la altura mínima para que el contenido y el botón queden dentro del fondo blanco */
+    /*min-height: 420px; /* ajusta este valor según lo que veas en pantalla */
+}#panel-web .tab-container {
+    padding-top: 1rem;
+}#panel-web .drop-area {
+    border: 2px dashed #9aa4b2;
+    border-radius: 1rem;
+    background: #fff;
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    transition: 0.2s ease;
+    cursor: pointer;
+    padding: 1rem;
+}#panel-web .drop-area.highlight {
+    border-color: #0d6efd;
+    background: #eef5ff;
+}#panel-web .file-list {
+    margin-top: 1rem;
+}#panel-web .file-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+}#panel-web #listaConsultasDashboard .list-group-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}#panel-web #listaConsultasDashboard .form-check-label {
+    min-width: 0;
+    flex: 1 1 auto;
+}#panel-web #dashboardResumen .card-resumen,
+#panel-web #resumenCargaArchivos .card-resumen {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.85rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    cursor: pointer;
+    box-shadow: 0 0.1rem 0.5rem rgba(0, 0, 0, 0.04);
+    min-height: 180px;
+}#panel-web #dashboardResumen .card-resumen:hover,
+#panel-web #resumenCargaArchivos .card-resumen:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.08);
+}#panel-web #dashboardResumen .card-resumen .card-body,
+#panel-web #resumenCargaArchivos .card-resumen .card-
+
+#seccionCuadrosDashboard {
+    transition: all 0.2s ease;
+}#panel-web #cuadrosDashboardBody td {
+    vertical-align: middle;
+}#panel-web #tablaCuadrosCargaBody td {
+    vertical-align: middle;
+}#panel-web #modalCuadrosCarga .modal-body,
+#panel-web #modalVerTablaErrores .modal-body,
+#panel-web #modalNuevaConsulta .modal-
+
+#modalNuevaConsulta .form-check {
+    margin-bottom: 0.35rem;
+}#panel-web #modalNuevaConsulta .border.rounded.p-3 {
+    background: #fafbfc;
+}#panel-web #mesesInicialesConsulta .form-check,
+#panel-web #mesesFinalesConsulta .form-check {
+    padding-left: 0;
+}#panel-web #mesesInicialesConsulta .form-check-label,
+#panel-web #mesesFinalesConsulta .form-check-label {
+    font-size: 0.95rem;
+}#panel-web .toast-container {
+    z-index: 1080;
+}#panel-web #uploadSummary {
+    border-radius: 0.9rem;
+}#panel-web #btnGuardarCuadrosBD {
+    white-space: nowrap;
+}#panel-web .badge {
+    font-weight: 600;
+}#panel-web .table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.04);
+}#panel-web .badge-anio-pendiente {
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0.15rem 0.5rem rgba(0, 0, 0, 0.15);
+}#panel-web .badge-anio-pendiente {
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0.15rem 0.5rem rgba(0, 0, 0, 0.18);
+}
