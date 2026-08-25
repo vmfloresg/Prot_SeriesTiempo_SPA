@@ -184,3 +184,54 @@
     letter-spacing: 0.5px;
     box-shadow: 0 0.15rem 0.5rem rgba(0, 0, 0, 0.18);
 }
+
+/* Reglas globales necesarias para los modales y toast del módulo, que viven fuera de .app-view */
+/* Para estilo de check  */
+
+#modalCuadros .estado-checkbox {
+    width: 1.15rem;
+    height: 1.15rem;
+    border: 1px solid #198754;
+    border-radius: 0.25rem;
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: #fff;
+    position: relative;
+    cursor: default;
+}
+#modalCuadros .estado-checkbox:checked {
+    background-color: #198754;
+    border-color: #198754;
+}
+#modalCuadros .estado-checkbox:checked::after {
+    content: "";
+    position: absolute;
+    left: 0.32rem;
+    top: 0.08rem;
+    width: 0.28rem;
+    height: 0.58rem;
+    border: solid #fff;
+    border-width: 0 0.18rem 0.18rem 0;
+    transform: rotate(45deg);
+}
+#modalCuadros .estado-checkbox:disabled {
+    opacity: 1;
+}
+#modalCuadrosCarga .modal-body,
+#modalVerTablaErrores .modal-body,
+#modalNuevaConsulta .modal-body {
+    background: #fff;
+}
+#modalNuevaConsulta .form-check {
+    margin-bottom: 0.35rem;
+}
+#modalNuevaConsulta .border.rounded.p-3 {
+    background: #fafbfc;
+}
+.toast-container {
+    z-index: 1080;
+}
+/* Modal de errores: está fuera de #panel-web para que Bootstrap pueda mostrarlo. */
+#modalVerTablaErrores { z-index: 1060; }
+#modalVerTablaErrores .modal-dialog { max-width: 1140px; }
+#modalVerTablaErrores .modal-content { background-color: #fff; }

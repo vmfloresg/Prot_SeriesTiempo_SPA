@@ -435,7 +435,8 @@ function initPanelWeb() {
         });
     }
 
-    function renderCuadrosDashboard(filtro = "todos") {
+    // FIX SPA: los botones dinámicos usan .btn-detalle-cuadro-carga; se atiende también el nombre histórico .btn-ver-tabla.
+function renderCuadrosDashboard(filtro = "todos") {
         if (!cuadrosDashboardBody) return;
         filtroCuadrosActual = filtro;
         cuadrosDashboardBody.innerHTML = "";
@@ -472,7 +473,7 @@ function initPanelWeb() {
         });
 
         // Eventos para ver la tabla de errores
-        document.querySelectorAll(".btn-ver-tabla").forEach((btn) => {
+        document.querySelectorAll(".btn-detalle-cuadro-carga, .btn-ver-tabla").forEach((btn) => {
             btn.addEventListener("click", () => {
                 const cuadro = estadoCuadros.find((c) => c.nombre === btn.getAttribute("data-cuadro"));
                 if (!cuadro) return;
@@ -480,7 +481,10 @@ function initPanelWeb() {
                 if (tablaErroresBody) {
                     tablaErroresBody.innerHTML = cuadro.errores.map((err) => `<tr><td>${err.registro}</td><td>${err.campo}</td><td>${err.valor}</td><td>${err.problema}</td></tr>`).join("");
                 }
-                new bootstrap.Modal(document.getElementById("modalVerTablaErrores")).show();
+                const modalError = document.getElementById("modalVerTablaErrores");
+                if (modalError && typeof bootstrap !== "undefined" && bootstrap.Modal) {
+                    bootstrap.Modal.getOrCreateInstance(modalError).show();
+                }
             });
         });
 
@@ -1192,3 +1196,15 @@ WHERE (anio = '${anioIni}' AND mes >= '${mesIni}')
 document.addEventListener("DOMContentLoaded", () => {
     initPanelWeb();
 });
+
+
+// Los modales se encuentran fuera de .app-view para que no hereden display:none.
+// Bootstrap 5 se encarga de crear/quitar el backdrop y restaurar el scroll del body.
+function mostrarModalPanelWeb(id) {
+    const elemento = document.getElementById(id);
+    if (!elemento || typeof bootstrap === "undefined") {
+        console.error("No se pudo abrir el modal:", id);
+        return;
+    }
+    bootstrap.Modal.getOrCreateInstance(elemento).show();
+}
