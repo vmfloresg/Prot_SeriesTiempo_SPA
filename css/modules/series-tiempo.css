@@ -1720,3 +1720,37 @@
   font-size: 0.9rem;
 }
 \n\n/* Menú Nuevo estable dentro de la SPA */\n#tables .ts-crud-toolbar,\n#tables .ts-crud-toolbar .card-body {\n  overflow: visible !important;\n}\n\n#tables .ts-nuevo-dropdown {\n  position: relative;\n}\n\n#tables .ts-nuevo-dropdown > .dropdown-menu {\n  position: absolute;\n  top: calc(100% + 6px);\n  right: 0;\n  left: auto;\n  z-index: 1085;\n  min-width: 270px;\n  display: none;\n}\n\n#tables .ts-nuevo-dropdown > .dropdown-menu.show {\n  display: block;\n}\n
+
+/* Selección de registros en el modal "Cuadros y series registrados" */
+#tsCrudRegistrosModal .ts-crud-selectable-row {
+    cursor: pointer;
+    transition: background-color .15s ease, box-shadow .15s ease;
+}
+
+#tsCrudRegistrosModal .ts-crud-selectable-row:hover {
+    background-color: var(--bs-tertiary-bg);
+}
+
+#tsCrudRegistrosModal .ts-crud-selectable-row:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: -2px;
+}
+
+#tsCrudRegistrosModal .ts-crud-row-selected,
+#tsCrudRegistrosModal .ts-crud-row-selected:hover {
+    background-color: var(--bs-primary-bg-subtle);
+    box-shadow: inset 4px 0 0 var(--bs-primary);
+}
+
+#tsCrudRegistrosModal .ts-crud-row-selected td {
+    border-color: var(--bs-primary-border-subtle);
+}
+
+#tsCrudRegistrosModal .ts-crud-row-selected .fw-semibold {
+    color: var(--bs-primary-text-emphasis);
+}
+
+#tsCrudRegistrosModal .ts-crud-row-disabled:not(.ts-crud-row-selected) {
+    background-color: var(--bs-tertiary-bg);
+    color: var(--bs-secondary-color);
+}

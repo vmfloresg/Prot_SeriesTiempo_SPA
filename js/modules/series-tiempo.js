@@ -13,6 +13,75 @@ let ts_chart = null;
    INICIALIZACIÓN
    ========================================================= */
 
+
+function ts_crudCrearRegistrosEjemplo() {
+    const ahora = new Date();
+    const fecha = dias => new Date(ahora.getTime() - dias * 86400000).toISOString();
+
+    const ejemplos = [
+        {
+            id: "CS-0001",
+            creadoEn: fecha(30), actualizadoEn: fecha(1), habilitado: true,
+            titulo: { texto: "Recursos administrados por las AFORE", renglon: "1", alineacion: "center", sangria: "0" },
+            configuracionSerie: { descripcion: "Recursos administrados por las AFORE al cierre de cada periodo.", decimales: 2, tipoCifra: "Saldo", periodicidad: "Mensual", periodoInicio: "2025-01", periodoFin: "2026-06", unidad: "Millones de pesos" },
+            seriesDatos: [
+                { id: 1, parentId: null, title: "Recursos administrados", indent: 0, afores: ["Azteca", "Banamex", "Coppel"] },
+                { id: 2, parentId: 1, title: "Recursos por tipo de fondo", indent: 1, afores: ["Inbursa", "PensionISSSTE"] }
+            ],
+            siguienteSerieId: 3,
+            notas: "Cifras ficticias utilizadas únicamente para demostración del prototipo.",
+            fuente: "Datos ficticios - prototipo",
+            seriesLegacy: [], datosLegacy: []
+        },
+        {
+            id: "CS-0002",
+            creadoEn: fecha(24), actualizadoEn: fecha(3), habilitado: true,
+            titulo: { texto: "Número de cuentas administradas", renglon: "1", alineacion: "center", sangria: "0" },
+            configuracionSerie: { descripcion: "Total de cuentas administradas por AFORE.", decimales: 0, tipoCifra: "Total", periodicidad: "Mensual", periodoInicio: "2025-01", periodoFin: "2026-06", unidad: "Cuentas" },
+            seriesDatos: [
+                { id: 1, parentId: null, title: "Cuentas registradas", indent: 0, afores: ["Profuturo", "SURA", "XXI Banorte"] },
+                { id: 2, parentId: 1, title: "Cuentas asignadas", indent: 1, afores: ["Principal", "Invercap"] }
+            ],
+            siguienteSerieId: 3,
+            notas: "Información de ejemplo para visualizar la estructura jerárquica.",
+            fuente: "Datos ficticios - prototipo",
+            seriesLegacy: [], datosLegacy: []
+        },
+        {
+            id: "CS-0003",
+            creadoEn: fecha(18), actualizadoEn: fecha(5), habilitado: true,
+            titulo: { texto: "Rendimiento neto por AFORE", renglon: "1", alineacion: "center", sangria: "0" },
+            configuracionSerie: { descripcion: "Indicadores ficticios de rendimiento neto por administradora.", decimales: 2, tipoCifra: "Porcentaje", periodicidad: "Trimestral", periodoInicio: "2025-01", periodoFin: "2026-06", unidad: "Porcentaje" },
+            seriesDatos: [
+                { id: 1, parentId: null, title: "Rendimiento neto", indent: 0, afores: ["Citibanamex", "Coppel", "Inbursa"] },
+                { id: 2, parentId: null, title: "Rendimiento por horizonte", indent: 0, afores: ["Profuturo", "SURA"] }
+            ],
+            siguienteSerieId: 3,
+            notas: "Porcentajes generados con fines ilustrativos.",
+            fuente: "Datos ficticios - prototipo",
+            seriesLegacy: [], datosLegacy: []
+        }
+    ];
+
+    const registros = ts_crudLeerRegistros();
+    if (!registros.length) {
+        ts_crudPersistirRegistros(ejemplos);
+        return;
+    }
+
+    // Si los registros ficticios ya existían de una versión anterior sin jerarquía,
+    // se enriquecen sin sobrescribir registros reales creados por el usuario.
+    let cambio = false;
+    ejemplos.forEach(ejemplo => {
+        const i = registros.findIndex(r => r.id === ejemplo.id);
+        if (i >= 0 && (!Array.isArray(registros[i].seriesDatos) || registros[i].seriesDatos.length === 0)) {
+            registros[i] = { ...registros[i], ...ejemplo, creadoEn: registros[i].creadoEn || ejemplo.creadoEn };
+            cambio = true;
+        }
+    });
+    if (cambio) ts_crudPersistirRegistros(registros);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
 
     document
@@ -2972,7 +3041,12 @@ function ts_crudEliminar(id) {
     ts_mostrarMensaje(`Cuadro ${id} eliminado.`, "success");
 }
 
+let ts_crudRegistroSeleccionado = null;
+
 function ts_crudAbrirRegistros() {
+    ts_crudRegistroSeleccionado = null;
+    const actualizar = document.getElementById("tsCrudActualizarSeleccionadoBtn");
+    if (actualizar) actualizar.disabled = true;
     ts_crudRenderizarRegistros();
     const modal = document.getElementById("tsCrudRegistrosModal");
     if (modal) bootstrap.Modal.getOrCreateInstance(modal).show();
@@ -2987,7 +3061,7 @@ function ts_crudRenderizarRegistros() {
     const registros = ts_crudLeerRegistros()
         .filter(r => {
             const c = r.configuracionSerie || {};
-            return [r.id, r.titulo?.texto, c.descripcion, c.periodicidad, c.unidad]
+            return [r.id, r.titulo?.texto, c.periodicidad]
                 .some(v => String(v || "").toLowerCase().includes(query));
         })
         .sort((a,b) => String(b.actualizadoEn || "").localeCompare(String(a.actualizadoEn || "")));
@@ -2997,27 +3071,112 @@ function ts_crudRenderizarRegistros() {
 
     registros.forEach(registro => {
         const c = registro.configuracionSerie || {};
-        const inicio = ts_formatearPeriodo(c.periodoInicio);
-        const fin = ts_formatearPeriodo(c.periodoFin);
-        const periodo = inicio === "—" && fin === "—" ? "—" : `${inicio} – ${fin}`;
+        const deshabilitado = registro.habilitado === false;
+        const seleccionado = ts_crudRegistroSeleccionado === registro.id;
         const tr = document.createElement("tr");
+
+        tr.classList.add("ts-crud-selectable-row");
+        tr.dataset.registroId = registro.id;
+        tr.tabIndex = 0;
+        tr.setAttribute("role", "button");
+        tr.setAttribute("aria-selected", seleccionado ? "true" : "false");
+
+        if (deshabilitado) tr.classList.add("ts-crud-row-disabled");
+        if (seleccionado) tr.classList.add("ts-crud-row-selected");
+
+        tr.addEventListener("click", (event) => {
+            if (event.target.closest("button, a, input, select, textarea")) return;
+            ts_crudSeleccionarRegistro(registro.id);
+        });
+
+        tr.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                ts_crudSeleccionarRegistro(registro.id);
+            }
+        });
+
         tr.innerHTML = `
             <td><span class="badge text-bg-light border">${ts_escapeHtml(registro.id)}</span></td>
             <td>
               <div class="fw-semibold">${ts_escapeHtml(registro.titulo?.texto || "Sin título")}</div>
-              <small class="text-muted ts-crud-description">${ts_escapeHtml(c.descripcion || "Sin descripción")}</small>
+              ${deshabilitado ? '<small class="badge text-bg-secondary mt-1">Deshabilitado</small>' : ''}
             </td>
             <td>${ts_escapeHtml(c.periodicidad || "—")}</td>
-            <td class="text-nowrap">${ts_escapeHtml(periodo)}</td>
-            <td class="text-center"><span class="badge text-bg-primary">${(registro.seriesDatos || []).length}</span></td>
             <td class="text-nowrap"><small>${ts_crudFecha(registro.actualizadoEn)}</small></td>
             <td class="text-end text-nowrap">
-              <button class="btn btn-sm btn-outline-secondary" title="Consultar" onclick="ts_crudConsultar('${registro.id}')"><i class="bi bi-eye"></i></button>
-              <button class="btn btn-sm btn-outline-primary ms-1" title="Editar" onclick="ts_crudEditar('${registro.id}')"><i class="bi bi-pencil-square"></i></button>
-              <button class="btn btn-sm btn-outline-danger ms-1" title="Eliminar" onclick="ts_crudEliminar('${registro.id}')"><i class="bi bi-trash"></i></button>
+              <button class="btn btn-sm ${deshabilitado ? 'btn-outline-success' : 'btn-outline-danger'}" 
+                      title="${deshabilitado ? 'Habilitar' : 'Deshabilitar'}"
+                      onclick="event.stopPropagation(); ts_crudCambiarEstado('${registro.id}')">
+                <i class="bi ${deshabilitado ? 'bi-check-circle' : 'bi-slash-circle'} me-1"></i>
+                ${deshabilitado ? 'Habilitar' : 'Deshabilitar'}
+              </button>
             </td>`;
         body.appendChild(tr);
     });
+}
+
+
+function ts_crudSeleccionarRegistro(id) {
+    ts_crudRegistroSeleccionado = id;
+
+    document.querySelectorAll("#tsCrudRegistrosBody .ts-crud-selectable-row").forEach(row => {
+        const seleccionado = row.dataset.registroId === id;
+        row.classList.toggle("ts-crud-row-selected", seleccionado);
+        row.setAttribute("aria-selected", seleccionado ? "true" : "false");
+    });
+
+    const actualizar = document.getElementById("tsCrudActualizarSeleccionadoBtn");
+    if (actualizar) actualizar.disabled = !id;
+}
+
+function ts_crudActualizarSeleccionado() {
+    if (!ts_crudRegistroSeleccionado) {
+        ts_mostrarMensaje("Seleccione un cuadro antes de actualizarlo.", "warning");
+        return;
+    }
+
+    const registro = ts_crudLeerRegistros().find(r => r.id === ts_crudRegistroSeleccionado);
+    if (!registro) {
+        ts_mostrarMensaje("El registro seleccionado ya no existe.", "warning");
+        return;
+    }
+
+    // Asegurar que se muestre el constructor y no la pantalla de Consulta SQL.
+    if (typeof ts_mostrarModoCuadros === "function") ts_mostrarModoCuadros(false);
+
+    ts_crudAplicarRegistro(registro);
+
+    const modal = document.getElementById("tsCrudRegistrosModal");
+    if (modal) bootstrap.Modal.getOrCreateInstance(modal).hide();
+
+    // Mantener el acordeón colapsado, pero con todos los campos ya cargados.
+    document.querySelectorAll("#configurationAccordion .accordion-collapse.show").forEach(element => {
+        bootstrap.Collapse.getOrCreateInstance(element, { toggle: false }).hide();
+    });
+
+    ts_mostrarMensaje(`Cuadro ${registro.id} cargado para actualización.`, "info");
+}
+
+
+function ts_crudCambiarEstado(id) {
+    const registros = ts_crudLeerRegistros();
+    const registro = registros.find(r => r.id === id);
+    if (!registro) {
+        ts_mostrarMensaje("El registro solicitado ya no existe.", "warning");
+        return;
+    }
+
+    registro.habilitado = registro.habilitado === false;
+    registro.actualizadoEn = new Date().toISOString();
+    ts_crudPersistirRegistros(registros);
+    ts_crudRenderizarRegistros();
+    ts_mostrarMensaje(
+        registro.habilitado === false
+            ? `Cuadro ${id} deshabilitado correctamente.`
+            : `Cuadro ${id} habilitado correctamente.`,
+        "success"
+    );
 }
 
 function ts_crudConsultar(id) {
@@ -3145,6 +3304,7 @@ function ts_crudMigrarConfiguracionAnterior() {
 
 document.addEventListener("DOMContentLoaded", () => {
     ts_crudMigrarConfiguracionAnterior();
+    ts_crudCrearRegistrosEjemplo();
     ts_crudActualizarEstado();
 });
 

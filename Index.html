@@ -2534,19 +2534,17 @@
       <div class="modal-body">
         <div class="input-group mb-3">
           <span class="input-group-text"><i class="bi bi-search"></i></span>
-          <input type="search" id="tsCrudBuscar" class="form-control" placeholder="Buscar por título, descripción, periodicidad o unidad..." oninput="ts_crudRenderizarRegistros()">
+          <input type="search" id="tsCrudBuscar" class="form-control" placeholder="Buscar por clave, título o periodicidad..." oninput="ts_crudRenderizarRegistros()">
         </div>
         <div class="table-responsive">
           <table class="table table-hover align-middle ts-crud-table">
             <thead>
               <tr>
-                <th style="width:110px">Clave</th>
-                <th>Cuadro / serie</th>
-                <th>Periodicidad</th>
-                <th>Periodo</th>
-                <th class="text-center">Series</th>
-                <th>Actualizado</th>
-                <th class="text-end" style="width:210px">Acciones</th>
+                <th style="width:120px">Clave</th>
+                <th>Título del cuadro</th>
+                <th style="width:160px">Periodicidad</th>
+                <th style="width:190px">Fecha de actualización</th>
+                <th class="text-end" style="width:160px">Acciones</th>
               </tr>
             </thead>
             <tbody id="tsCrudRegistrosBody"></tbody>
@@ -2558,9 +2556,9 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="ts_crudNuevo()">
-          <i class="bi bi-plus-circle me-1"></i> Nuevo cuadro
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="tsCrudActualizarSeleccionadoBtn" disabled onclick="ts_crudActualizarSeleccionado()">
+          <i class="bi bi-arrow-repeat me-1"></i> Actualizar
         </button>
       </div>
     </div>
