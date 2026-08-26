@@ -1,591 +1,486 @@
-<div id="tables" class="app-view d-none">
-
-<div class="card border-0 shadow-sm mb-3">
-  <div class="card-body py-2">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-      <div>
-        <h5 class="mb-0"><i class="bi bi-bar-chart-line me-2"></i>Constructor de cuadros y series</h5>
-        <small class="text-muted">Configuración y previsualización de series de tiempo.</small>
-      </div>
-      <button type="button" class="btn btn-primary btn-sm" onclick="ts_guardarConfiguracion()">
-        <i class="bi bi-save me-1"></i> Guardar configuración
-      </button>
-    </div>
-  </div>
+<div class="app-view d-none" id="tables">
+<div class="card border-0 shadow-sm mb-3 ts-crud-toolbar">
+<div class="card-body py-2">
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+<div>
+<h5 class="mb-0"><i class="bi bi-table me-2"></i>Creación de cuadros y series</h5>
+<small class="text-muted">Alta, consulta, edición y eliminación de cuadros con estructura jerárquica de series.</small>
 </div>
+<div class="d-flex flex-wrap align-items-center gap-2">
+<div class="dropdown">
+<button aria-expanded="false" class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown" type="button">
+<i class="bi bi-file-earmark-plus me-1"></i> Nuevo
+          </button>
+<ul class="dropdown-menu dropdown-menu-end shadow-sm">
+<li>
+<button class="dropdown-item" onclick="ts_mostrarModoCuadros(true)" type="button">
+<i class="bi bi-table me-2"></i> Creación de cuadros y series
+              </button>
+</li>
+<li>
+<button class="dropdown-item" onclick="ts_mostrarModoConsulta()" type="button">
+<i class="bi bi-database-add me-2"></i> Crear nueva consulta
+              </button>
+</li>
+</ul>
+</div>
+<button class="btn btn-outline-secondary btn-sm" id="tsCrudActualizarBtn" onclick="ts_crudAbrirRegistros()" type="button">
+<i class="bi bi-arrow-repeat me-1"></i> Actualizar
+          <span class="badge text-bg-secondary ms-1" id="tsCrudContador">0</span>
+</button>
+<button class="btn btn-primary btn-sm" id="tsCrudGuardarBtn" onclick="ts_crudGuardar()" type="button">
+<i class="bi bi-save me-1"></i> Guardar
+        </button>
+</div>
+</div>
+</div>
+</div>
+<div id="tsModoCuadros">
 <div class="row g-0 workspace">
-            <!-- ================================================= -->
-
-            <!-- PANEL IZQUIERDO -->
-
-            <!-- ================================================= -->
-
-            <aside class="col-lg-4 col-xl-4 configuration-panel">
-                <div class="panel-header">
-                    <div>
-                        <h2> Configuración </h2>
-                        <p> Define los elementos que compondrán el cuadro. </p>
-                    </div> <span class="configuration-status"> <i class="bi bi-circle-fill"></i> Edición </span>
-                </div>
-                <div class="accordion accordion-flush" id="configurationAccordion">
-
-                    <!-- ================================================= -->
-                    <!-- 1. TITULO -->
-                    <!-- ================================================= -->
-
-                    <div class="accordion-item">
-                        <h2 class="accordion-header"> <button class="accordion-button" type="button"
-                                data-bs-toggle="collapse" data-bs-target="#sectionTitle"> <span
-                                    class="section-number">1</span> <span> <strong>Título del cuadro</strong>
-                                    <small>Configuración del encabezado</small> </span> </button> </h2>
-                        <div id="sectionTitle" class="accordion-collapse collapse show"
-                            data-bs-parent="#configurationAccordion">
-                            <div class="accordion-body">
-                                <div class="mb-3"> <label class="form-label"> Título </label> <input type="text"
-                                        id="chartTitle" class="form-control"
-                                        placeholder="Ej. Evolución de los activos administrados"> </div>
-                                <div class="row">
-                                    <div class="col-md-6 mb-3"> <label class="form-label"> Renglón / línea </label>
-                                        <input type="number" id="titleRow" class="form-control" value="1" min="1"
-                                            max="20">
-                                        <div class="form-text"> Posición vertical del título. </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3"> <label class="form-label"> Alineación </label> <select
-                                            id="titleAlignment" class="form-select">
-                                            <option value="left"> Izquierda </option>
-                                            <option value="center" selected> Centrado </option>
-                                            <option value="right"> Derecha </option>
-                                        </select> </div>
-                                </div>
-                                <div class="mb-3"> <label class="form-label"> Sangría </label> <input type="range"
-                                        id="titleIndent" class="form-range" min="0" max="10" value="0">
-                                    <div class="range-label"> <span>Sin sangría</span> <span id="indentValue">0</span>
-                                    </div>
-                                </div> <button class="btn btn-primary w-100" onclick="actualizarTitulo()"> <i
-                                        class="bi bi-eye"></i> Enviar a previsualización </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ================================================= -->
-                    <!-- 2. CONFIGURAR SERIE DE TIEMPO -->
-                    <!-- ================================================= -->
-
-                    <div class="accordion-item">
-                        <h2 class="accordion-header"> <button class="accordion-button collapsed" type="button"
-                                data-bs-toggle="collapse" data-bs-target="#sectionSeries"> <span
-                                    class="section-number">2</span> <span> <strong>Configurar serie de tiempo</strong>
-                                    <small>Información general del cuadro</small> </span> </button> </h2>
-                        <div id="sectionSeries" class="accordion-collapse collapse"
-                            data-bs-parent="#configurationAccordion">
-                            <div class="accordion-body"> <!-- DESCRIPCIÓN -->
-                                <div class="mb-3"> <label class="form-label"> Descripción del cuadro </label> <textarea
-                                        id="seriesDescription" class="form-control" rows="3"
-                                        placeholder="Describa brevemente el contenido y propósito del cuadro o serie de tiempo..."> </textarea>
-                                    <div class="form-text"> Descripción general de la información presentada. </div>
-                                </div>
-                                <!-- DECIMALES -->
-                                <div class="mb-3"> <label class="form-label"> Número de decimales </label> <select
-                                        id="decimalPlaces" class="form-select">
-                                        <option value="0"> 0 decimales </option>
-                                        <option value="1"> 1 decimal </option>
-                                        <option value="2" selected> 2 decimales </option>
-                                        <option value="3"> 3 decimales </option>
-                                        <option value="4"> 4 decimales </option>
-                                        <option value="5"> 5 decimales </option>
-                                        <option value="6"> 6 decimales </option>
-                                    </select> </div> <!-- TIPO DE CIFRA -->
-                                <div class="mb-3"> <label class="form-label"> Tipo de cifra </label> <select
-                                        id="figureType" class="form-select">
-                                        <option value=""> Seleccione el tipo de cifra </option>
-                                        <option value="Saldo promedio"> Saldo promedio </option>
-                                        <option value="Saldo al cierre"> Saldo al cierre </option>
-                                        <option value="Flujo del periodo"> Flujo del periodo </option>
-                                        <option value="Acumulado"> Acumulado </option>
-                                        <option value="Variación porcentual"> Variación porcentual </option>
-                                        <option value="Índice"> Índice </option>
-                                        <option value="Otro"> Otro </option>
-                                    </select> </div> <!-- PERIODICIDAD -->
-                                <div class="mb-3"> <label class="form-label"> Periodicidad </label> <select
-                                        id="seriesFrequency" class="form-select">
-                                        <option value=""> Seleccione la periodicidad </option>
-                                        <option value="Diaria"> Diaria </option>
-                                        <option value="Semanal"> Semanal </option>
-                                        <option value="Mensual"> Mensual </option>
-                                        <option value="Bimestral"> Bimestral </option>
-                                        <option value="Trimestral"> Trimestral </option>
-                                        <option value="Semestral"> Semestral </option>
-                                        <option value="Anual"> Anual </option>
-                                    </select> </div> <!-- PERIODO DISPONIBLE -->
-                                <div class="mb-3"> <label class="form-label"> Periodo disponible </label>
-                                    <div class="row g-2">
-                                        <div class="col-6"> <input
-                                                type="month" id="availablePeriodStart" class="form-control"> </div>
-                                        <div class="col-6"> <input
-                                                type="month" id="availablePeriodEnd" class="form-control"> </div>
-                                    </div>
-                                    <div class="form-text"> Indique el periodo histórico disponible. </div>
-                                </div> <!-- UNIDAD -->
-                                <div class="mb-4"> <label class="form-label"> Unidad de medida </label> <select
-                                        id="seriesUnit" class="form-select">
-                                        <option value=""> Seleccione la unidad </option>
-                                        <option value="Pesos"> Pesos </option>
-                                        <option value="Miles de pesos"> Miles de pesos </option>
-                                        <option value="Millones de pesos"> Millones de pesos </option>
-                                        <option value="Miles de millones de pesos"> Miles de millones de pesos </option>
-                                        <option value="Porcentaje"> Porcentaje </option>
-                                        <option value="Índice"> Índice </option>
-                                        <option value="Número"> Número </option>
-                                    </select> </div> <!-- BOTÓN --> <button class="btn btn-primary w-100"
-                                    onclick="agregarConfiguracionSerie()"> <i class="bi bi-eye"></i> Agregar elementos a
+<!-- ================================================= -->
+<!-- PANEL IZQUIERDO -->
+<!-- ================================================= -->
+<aside class="col-lg-4 col-xl-4 configuration-panel">
+<div class="panel-header">
+<div>
+<h2> Configuración </h2>
+<p> Define los elementos que compondrán el cuadro. </p>
+</div> <span class="configuration-status" id="tsCrudModoPanel"> <i class="bi bi-circle-fill"></i> Nuevo </span>
+</div>
+<div class="accordion accordion-flush" id="configurationAccordion">
+<!-- ================================================= -->
+<!-- 1. TITULO -->
+<!-- ================================================= -->
+<div class="accordion-item">
+<h2 class="accordion-header"> <button aria-expanded="false" class="accordion-button collapsed" data-bs-target="#sectionTitle" data-bs-toggle="collapse" type="button"> <span class="section-number">1</span> <span> <strong>Título del cuadro</strong>
+<small>Configuración del encabezado</small> </span> </button> </h2>
+<div class="accordion-collapse collapse" data-bs-parent="#configurationAccordion" id="sectionTitle">
+<div class="accordion-body">
+<div class="mb-3"> <label class="form-label"> Título </label> <input class="form-control" id="chartTitle" placeholder="Ej. Evolución de los activos administrados" type="text"/> </div>
+<div class="row">
+<div class="col-md-6 mb-3"> <label class="form-label"> Renglón / línea </label>
+<input class="form-control" id="titleRow" max="20" min="1" type="number" value="1"/>
+<div class="form-text"> Posición vertical del título. </div>
+</div>
+<div class="col-md-6 mb-3"> <label class="form-label"> Alineación </label> <select class="form-select" id="titleAlignment">
+<option value="left"> Izquierda </option>
+<option selected="" value="center"> Centrado </option>
+<option value="right"> Derecha </option>
+</select> </div>
+</div>
+<div class="mb-3"> <label class="form-label"> Sangría </label> <input class="form-range" id="titleIndent" max="10" min="0" type="range" value="0"/>
+<div class="range-label"> <span>Sin sangría</span> <span id="indentValue">0</span>
+</div>
+</div> <button class="btn btn-primary w-100" onclick="ts_actualizarTitulo()"> <i class="bi bi-eye"></i> Enviar a previsualización </button>
+</div>
+</div>
+</div>
+<!-- ================================================= -->
+<!-- 2. CONFIGURAR SERIE DE TIEMPO -->
+<!-- ================================================= -->
+<div class="accordion-item">
+<h2 class="accordion-header"> <button class="accordion-button collapsed" data-bs-target="#sectionSeries" data-bs-toggle="collapse" type="button"> <span class="section-number">2</span> <span> <strong>Configurar serie de tiempo</strong>
+<small>Información general del cuadro</small> </span> </button> </h2>
+<div class="accordion-collapse collapse" data-bs-parent="#configurationAccordion" id="sectionSeries">
+<div class="accordion-body"> <!-- DESCRIPCIÓN -->
+<div class="mb-3"> <label class="form-label"> Descripción del cuadro </label> <textarea class="form-control" id="seriesDescription" placeholder="Describa brevemente el contenido y propósito del cuadro o serie de tiempo..." rows="3"> </textarea>
+<div class="form-text"> Descripción general de la información presentada. </div>
+</div>
+<!-- DECIMALES -->
+<div class="mb-3"> <label class="form-label"> Número de decimales </label> <select class="form-select" id="decimalPlaces">
+<option value="0"> 0 decimales </option>
+<option value="1"> 1 decimal </option>
+<option selected="" value="2"> 2 decimales </option>
+<option value="3"> 3 decimales </option>
+<option value="4"> 4 decimales </option>
+<option value="5"> 5 decimales </option>
+<option value="6"> 6 decimales </option>
+</select> </div> <!-- TIPO DE CIFRA -->
+<div class="mb-3"> <label class="form-label"> Tipo de cifra </label> <select class="form-select" id="figureType">
+<option value=""> Seleccione el tipo de cifra </option>
+<option value="Saldo promedio"> Saldo promedio </option>
+<option value="Saldo al cierre"> Saldo al cierre </option>
+<option value="Flujo del periodo"> Flujo del periodo </option>
+<option value="Acumulado"> Acumulado </option>
+<option value="Variación porcentual"> Variación porcentual </option>
+<option value="Índice"> Índice </option>
+<option value="Otro"> Otro </option>
+</select> </div> <!-- PERIODICIDAD -->
+<div class="mb-3"> <label class="form-label"> Periodicidad </label> <select class="form-select" id="seriesFrequency">
+<option value=""> Seleccione la periodicidad </option>
+<option value="Diaria"> Diaria </option>
+<option value="Semanal"> Semanal </option>
+<option value="Mensual"> Mensual </option>
+<option value="Bimestral"> Bimestral </option>
+<option value="Trimestral"> Trimestral </option>
+<option value="Semestral"> Semestral </option>
+<option value="Anual"> Anual </option>
+</select> </div> <!-- PERIODO DISPONIBLE -->
+<div class="mb-3"> <label class="form-label"> Periodo disponible </label>
+<div class="row g-2">
+<div class="col-6"> <input class="form-control" id="availablePeriodStart" type="month"/> </div>
+<div class="col-6"> <input class="form-control" id="availablePeriodEnd" type="month"/> </div>
+</div>
+<div class="form-text"> Indique el periodo histórico disponible. </div>
+</div> <!-- UNIDAD -->
+<div class="mb-4"> <label class="form-label"> Unidad de medida </label> <select class="form-select" id="seriesUnit">
+<option value=""> Seleccione la unidad </option>
+<option value="Pesos"> Pesos </option>
+<option value="Miles de pesos"> Miles de pesos </option>
+<option value="Millones de pesos"> Millones de pesos </option>
+<option value="Miles de millones de pesos"> Miles de millones de pesos </option>
+<option value="Porcentaje"> Porcentaje </option>
+<option value="Índice"> Índice </option>
+<option value="Número"> Número </option>
+</select> </div> <!-- BOTÓN --> <button class="btn btn-primary w-100" onclick="ts_agregarConfiguracionSerie()"> <i class="bi bi-eye"></i> Agregar elementos a
                                     la previsualización </button>
-                                <div class="preview-update-message mt-3"> <i class="bi bi-info-circle"></i> Los
+<div class="preview-update-message mt-3"> <i class="bi bi-info-circle"></i> Los
                                     elementos configurados se mostrarán en la información general de la
                                     previsualización. </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- ================================================= -->
-                    <!-- 3. SERIES DE DATOS -->
-                    <!-- ================================================= -->
-
-                    <div class="accordion-item">
-
-                        <h2 class="accordion-header">
-
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#sectionData">
-
-                                <span class="section-number">3</span>
-
-                                <span>
-                                    <strong>Series de datos</strong>
-                                    <small>Configuración jerárquica de los datos</small>
-                                </span>
-
-                            </button>
-
-                        </h2>
-
-
-                        <div id="sectionData" class="accordion-collapse collapse"
-                            data-bs-parent="#configurationAccordion">
-
-                            <div class="accordion-body">
-
-                                <!-- ========================================= -->
-                                <!-- CONFIGURACIÓN DE UNA NUEVA SERIE -->
-                                <!-- ========================================= -->
-
-                                <div class="series-builder">
-
-                                    <div class="builder-title">
-
-                                        <i class="bi bi-diagram-3"></i>
+</div>
+</div>
+</div>
+<!-- ================================================= -->
+<!-- 3. SERIES DE DATOS -->
+<!-- ================================================= -->
+<div class="accordion-item">
+<h2 class="accordion-header">
+<button class="accordion-button collapsed" data-bs-target="#sectionData" data-bs-toggle="collapse" type="button">
+<span class="section-number">3</span>
+<span>
+<strong>Series de datos</strong>
+<small>Configuración jerárquica de los datos</small>
+</span>
+</button>
+</h2>
+<div class="accordion-collapse collapse" data-bs-parent="#configurationAccordion" id="sectionData">
+<div class="accordion-body">
+<!-- ========================================= -->
+<!-- CONFIGURACIÓN DE UNA NUEVA SERIE -->
+<!-- ========================================= -->
+<div class="series-builder">
+<div class="builder-title">
+<i class="bi bi-diagram-3"></i>
 
                                         Nueva serie de datos
 
                                     </div>
-
-
-                                    <!-- SERIE PADRE -->
-
-                                    <div class="mb-3">
-
-                                        <label class="form-label">
+<!-- SERIE PADRE -->
+<div class="mb-3">
+<label class="form-label">
                                             Serie padre
                                         </label>
-
-                                        <select id="parentSeries" class="form-select">
-
-                                            <option value="">
+<select class="form-select" id="parentSeries">
+<option value="">
                                                 Serie principal / sin padre
                                             </option>
-
-                                        </select>
-
-                                        <div class="form-text">
+</select>
+<div class="form-text">
 
                                             Seleccione una serie existente si esta
                                             serie será hija de otra.
 
                                         </div>
-
-                                    </div>
-
-
-                                    <!-- TITULO -->
-
-                                    <div class="mb-3">
-
-                                        <label class="form-label">
+</div>
+<!-- TITULO -->
+<div class="mb-3">
+<label class="form-label">
                                             Título de la serie
                                         </label>
-
-                                        <input type="text" id="dataSeriesTitle" class="form-control"
-                                            placeholder="Ej. Total de cuentas administradas en el SAR">
-
-                                    </div>
-
-
-                                    <!-- SANGRIA -->
-
-                                    <div class="mb-3">
-
-                                        <label class="form-label d-flex justify-content-between">
-
-                                            <span>
+<input class="form-control" id="dataSeriesTitle" placeholder="Ej. Total de cuentas administradas en el SAR" type="text"/>
+</div>
+<!-- SANGRIA -->
+<div class="mb-3">
+<label class="form-label d-flex justify-content-between">
+<span>
                                                 Sangría del título y datos
                                             </span>
-
-                                            <span id="dataSeriesIndentValue" class="indent-badge">
+<span class="indent-badge" id="dataSeriesIndentValue">
 
                                                 0
 
                                             </span>
-
-                                        </label>
-
-
-                                        <input type="range" id="dataSeriesIndent" class="form-range" min="0" max="8"
-                                            step="1" value="0">
-
-
-                                        <div class="indent-scale">
-
-                                            <span>Nivel 0</span>
-
-                                            <span>Nivel 1</span>
-
-                                            <span>Nivel 2</span>
-
-                                            <span>Nivel 3</span>
-
-                                            <span>Nivel 4+</span>
-
-                                        </div>
-
-                                    </div>
-
-
-                                    <!-- AFORES -->
-
-                                    <div class="mb-3">
-
-                                        <label class="form-label">
+</label>
+<input class="form-range" id="dataSeriesIndent" max="8" min="0" step="1" type="range" value="0"/>
+<div class="indent-scale">
+<span>Nivel 0</span>
+<span>Nivel 1</span>
+<span>Nivel 2</span>
+<span>Nivel 3</span>
+<span>Nivel 4+</span>
+</div>
+</div>
+<!-- AFORES -->
+<div class="mb-3">
+<label class="form-label">
                                             AFORE que forma parte de la serie
                                         </label>
-
-
-                                        <div class="afores-selector">
-
-                                            <button type="button"
-                                                class="btn btn-outline-secondary dropdown-toggle w-100 text-start"
-                                                data-bs-toggle="dropdown" data-bs-auto-close="outside">
-
-                                                <span id="selectedAforesText">
+<div class="afores-selector">
+<button aria-expanded="false" class="btn btn-outline-secondary dropdown-toggle w-100 text-start" id="aforesSelectorButton" type="button">
+<span id="selectedAforesText">
                                                     Seleccionar AFORE
                                                 </span>
-
-                                            </button>
-
-
-                                            <div class="dropdown-menu afores-dropdown w-100" id="aforesDropdown">
-
-
-                                                <div class="afores-dropdown-header">
-
-                                                    <button type="button" class="btn btn-link btn-sm"
-                                                        onclick="seleccionarTodasAfores()">
+</button>
+<div class="dropdown-menu afores-dropdown w-100" id="aforesDropdown">
+<div class="afores-dropdown-header">
+<button class="btn btn-link btn-sm" onclick="ts_seleccionarTodasAfores()" type="button">
 
                                                         Seleccionar todas
 
                                                     </button>
-
-
-                                                    <button type="button" class="btn btn-link btn-sm"
-                                                        onclick="deseleccionarTodasAfores()">
+<button class="btn btn-link btn-sm" onclick="ts_deseleccionarTodasAfores()" type="button">
 
                                                         Deseleccionar todas
 
                                                     </button>
-
-                                                </div>
-
-
-                                                <div class="dropdown-divider"></div>
-
-
-                                                <label class="afores-option">
-
-                                                    <input type="checkbox" class="form-check-input afore-check"
-                                                        value="Azteca">
-
-                                                    <span>Azteca</span>
-
-                                                </label>
-
-
-                                                <label class="afores-option">
-
-                                                    <input type="checkbox" class="form-check-input afore-check"
-                                                        value="Banamex">
-
-                                                    <span>Banamex</span>
-
-                                                </label>
-
-
-                                                <label class="afores-option">
-
-                                                    <input type="checkbox" class="form-check-input afore-check"
-                                                        value="Coppel">
-
-                                                    <span>Coppel</span>
-
-                                                </label>
-
-
-                                                <label class="afores-option">
-
-                                                    <input type="checkbox" class="form-check-input afore-check"
-                                                        value="Inbursa">
-
-                                                    <span>Inbursa</span>
-
-                                                </label>
-
-
-                                                <label class="afores-option">
-
-                                                    <input type="checkbox" class="form-check-input afore-check"
-                                                        value="Invercap">
-
-                                                    <span>Invercap</span>
-
-                                                </label>
-
-
-                                                <label class="afores-option">
-
-                                                    <input type="checkbox" class="form-check-input afore-check"
-                                                        value="PensionISSSTE">
-
-                                                    <span>PensionISSSTE</span>
-
-                                                </label>
-
-
-                                                <label class="afores-option">
-
-                                                    <input type="checkbox" class="form-check-input afore-check"
-                                                        value="Principal">
-
-                                                    <span>Principal</span>
-
-                                                </label>
-
-
-                                                <label class="afores-option">
-
-                                                    <input type="checkbox" class="form-check-input afore-check"
-                                                        value="Profuturo">
-
-                                                    <span>Profuturo</span>
-
-                                                </label>
-
-
-                                                <label class="afores-option">
-
-                                                    <input type="checkbox" class="form-check-input afore-check"
-                                                        value="SURA">
-
-                                                    <span>SURA</span>
-
-                                                </label>
-
-
-                                                <label class="afores-option">
-
-                                                    <input type="checkbox" class="form-check-input afore-check"
-                                                        value="XXI Banorte">
-
-                                                    <span>XXI Banorte</span>
-
-                                                </label>
-
-
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-
-
-                                    <!-- BOTON -->
-
-                                    <button type="button" class="btn btn-primary w-100" onclick="agregarSerieDatos()">
-
-                                        <i class="bi bi-plus-circle"></i>
+</div>
+<div class="dropdown-divider"></div>
+<label class="afores-option">
+<input class="form-check-input afore-check" type="checkbox" value="Azteca"/>
+<span>Azteca</span>
+</label>
+<label class="afores-option">
+<input class="form-check-input afore-check" type="checkbox" value="Banamex"/>
+<span>Banamex</span>
+</label>
+<label class="afores-option">
+<input class="form-check-input afore-check" type="checkbox" value="Coppel"/>
+<span>Coppel</span>
+</label>
+<label class="afores-option">
+<input class="form-check-input afore-check" type="checkbox" value="Inbursa"/>
+<span>Inbursa</span>
+</label>
+<label class="afores-option">
+<input class="form-check-input afore-check" type="checkbox" value="Invercap"/>
+<span>Invercap</span>
+</label>
+<label class="afores-option">
+<input class="form-check-input afore-check" type="checkbox" value="PensionISSSTE"/>
+<span>PensionISSSTE</span>
+</label>
+<label class="afores-option">
+<input class="form-check-input afore-check" type="checkbox" value="Principal"/>
+<span>Principal</span>
+</label>
+<label class="afores-option">
+<input class="form-check-input afore-check" type="checkbox" value="Profuturo"/>
+<span>Profuturo</span>
+</label>
+<label class="afores-option">
+<input class="form-check-input afore-check" type="checkbox" value="SURA"/>
+<span>SURA</span>
+</label>
+<label class="afores-option">
+<input class="form-check-input afore-check" type="checkbox" value="XXI Banorte"/>
+<span>XXI Banorte</span>
+</label>
+</div>
+</div>
+</div>
+<!-- BOTON -->
+<button class="btn btn-primary w-100" onclick="ts_agregarSerieDatos()" type="button">
+<i class="bi bi-plus-circle"></i>
 
                                         Agregar serie a la previsualización
 
                                     </button>
-
-                                </div>
-
-
-                                <!-- ========================================= -->
-                                <!-- SERIES CONFIGURADAS -->
-                                <!-- ========================================= -->
-
-                                <div class="configured-series mt-4">
-
-                                    <div class="configured-series-header">
-
-                                        <div>
-
-                                            <div class="list-title">
+</div>
+<!-- ========================================= -->
+<!-- SERIES CONFIGURADAS -->
+<!-- ========================================= -->
+<div class="configured-series mt-4">
+<div class="configured-series-header">
+<div>
+<div class="list-title">
                                                 Estructura de series
                                             </div>
-
-                                            <div class="configured-series-description">
+<div class="configured-series-description">
 
                                                 Las series pueden tener relaciones
                                                 padre-hijo y diferentes niveles de sangría.
 
                                             </div>
-
-                                        </div>
-
-                                    </div>
-
-
-                                    <div id="configuredSeriesContainer">
-
-                                        <div class="empty-message">
+</div>
+</div>
+<div id="configuredSeriesContainer">
+<div class="empty-message">
 
                                             No existen series configuradas.
 
                                         </div>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <!-- ================================================= -->
-                    <!-- 4. NOTAS -->
-                    <!-- ================================================= -->
-
-                    <div class="accordion-item">
-                        <h2 class="accordion-header"> <button class="accordion-button collapsed" type="button"
-                                data-bs-toggle="collapse" data-bs-target="#sectionNotes"> <span
-                                    class="section-number">4</span> <span> <strong>Notas y fuentes</strong>
-                                    <small>Información complementaria</small> </span> </button> </h2>
-                        <div id="sectionNotes" class="accordion-collapse collapse"
-                            data-bs-parent="#configurationAccordion">
-                            <div class="accordion-body">
-                                <div class="mb-3"> <label class="form-label"> Notas </label> <textarea id="chartNotes"
-                                        class="form-control" rows="5"
-                                        placeholder="Escriba las notas asociadas al cuadro..."> </textarea> </div>
-                                <div class="mb-3"> <label class="form-label"> Fuente de información </label> <textarea
-                                        id="chartSource" class="form-control" rows="3"
-                                        placeholder="Ej. CONSAR, estadísticas del SAR..."> </textarea> </div> <button
-                                    class="btn btn-primary w-100" onclick="actualizarNotas()"> <i
-                                        class="bi bi-check2-circle"></i> Actualizar previsualización </button>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-            </aside>
-
-            <!-- ================================================= -->
-            <!-- PANEL DERECHO -->
-            <!-- ================================================= -->
-
-            <section class="col-lg-8 col-xl-8 preview-panel">
-                <div class="preview-header">
-                    <div>
-                        <h2> <i class="bi bi-display"></i> Previsualización </h2>
-                        <p> Así se visualizará el cuadro configurado. </p>
-                    </div>
-
-                    <!-- ================================================= -->
-                    <!-- ACCIONES DE PREVISUALIZACIÓN -->
-                    <!-- ================================================= -->
-
-                    <div class="preview-actions">
-
-                        <!-- VISTA COMPLETA -->
-                        <button type="button" class="btn btn-outline-primary" onclick="vistaCompleta()">
-                            <i class="bi bi-arrows-fullscreen"></i>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ================================================= -->
+<!-- 4. NOTAS -->
+<!-- ================================================= -->
+<div class="accordion-item">
+<h2 class="accordion-header"> <button class="accordion-button collapsed" data-bs-target="#sectionNotes" data-bs-toggle="collapse" type="button"> <span class="section-number">4</span> <span> <strong>Notas y fuentes</strong>
+<small>Información complementaria</small> </span> </button> </h2>
+<div class="accordion-collapse collapse" data-bs-parent="#configurationAccordion" id="sectionNotes">
+<div class="accordion-body">
+<div class="mb-3"> <label class="form-label"> Notas </label> <textarea class="form-control" id="chartNotes" placeholder="Escriba las notas asociadas al cuadro..." rows="5"> </textarea> </div>
+<div class="mb-3"> <label class="form-label"> Fuente de información </label> <textarea class="form-control" id="chartSource" placeholder="Ej. CONSAR, estadísticas del SAR..." rows="3"> </textarea> </div> <button class="btn btn-primary w-100" onclick="ts_actualizarNotas()"> <i class="bi bi-check2-circle"></i> Actualizar previsualización </button>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- ================================================= -->
+<!-- PANEL DERECHO -->
+<!-- ================================================= -->
+<section class="col-lg-8 col-xl-8 preview-panel">
+<div class="preview-header">
+<div>
+<h2> <i class="bi bi-display"></i> Previsualización </h2>
+<p> Así se visualizará el cuadro configurado. </p>
+</div>
+<!-- ================================================= -->
+<!-- ACCIONES DE PREVISUALIZACIÓN -->
+<!-- ================================================= -->
+<div class="preview-actions">
+<!-- VISTA COMPLETA -->
+<button class="btn btn-outline-primary" onclick="ts_vistaCompleta()" type="button">
+<i class="bi bi-arrows-fullscreen"></i>
                             Vista completa
                         </button>
-
-                        <!-- EXPORTAR -->
-                        <div class="dropdown">
-                            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
-                                aria-expanded="false">
-                                <i class="bi bi-download"></i>
-                                Exportar
+<!-- EXPORTAR -->
+<div class="dropdown">
+<button aria-expanded="false" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" type="button">
+<i class="bi bi-file-earmark-arrow-down"></i>
+                                Genera plantilla
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end export-menu">
-                                <li>
-                                    <button type="button" class="dropdown-item" onclick="exportarExcel()">
-                                        <i class="bi bi-file-earmark-excel"></i>
+<ul class="dropdown-menu dropdown-menu-end export-menu">
+<li>
+<button class="dropdown-item" onclick="ts_exportarExcel()" type="button">
+<i class="bi bi-file-earmark-excel"></i>
                                         Excel
                                     </button>
-                                </li>
-                                <li>
-                                    <button type="button" class="dropdown-item" onclick="exportarPDF()">
-                                        <i class="bi bi-file-earmark-pdf"></i>
+</li>
+<li>
+<button class="dropdown-item" onclick="ts_exportarPDF()" type="button">
+<i class="bi bi-file-earmark-pdf"></i>
                                         PDF
                                     </button>
-                                </li>
-
-                                <li>
-                                    <button type="button" class="dropdown-item" onclick="exportarCSV()">
-                                        <i class="bi bi-filetype-csv"></i>
+</li>
+<li>
+<button class="dropdown-item" onclick="ts_exportarCSV()" type="button">
+<i class="bi bi-filetype-csv"></i>
                                         CSV
                                     </button>
-                                </li>
-
-                                <li>
-                                    <button type="button" class="dropdown-item" onclick="exportarIQY()">
-                                        <i class="bi bi-file-earmark-text"></i>
+</li>
+<li>
+<button class="dropdown-item" onclick="ts_exportarIQY()" type="button">
+<i class="bi bi-file-earmark-text"></i>
                                         IQY
                                     </button>
-                                </li>
-                            </ul>
-
-                        </div>
-                    </div>
-                </div>
-                <div class="preview-canvas">
-                    <div class="preview-document" id="previewDocument">
-                        <div class="preview-title" id="previewTitle"> Evolución de las series de tiempo </div>
-                        <div class="preview-meta" id="previewMeta"> <span> <i class="bi bi-calendar3"></i> Periodicidad:
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="preview-canvas">
+<div class="preview-document" id="previewDocument">
+<div class="preview-title" id="previewTitle"> Evolución de las series de tiempo </div>
+<div class="preview-meta" id="previewMeta"> <span> <i class="bi bi-calendar3"></i> Periodicidad:
                                 Mensual </span> <span> <i class="bi bi-database"></i> Fuente: — </span> </div>
-                        <div class="chart-container"> <canvas id="timeSeriesChart"></canvas> </div>
-                        <div class="preview-notes" id="previewNotes">
-                            <div class="notes-title"> Notas </div>
-                            <p> Configure las notas y fuentes desde el panel izquierdo. </p>
-                        </div>
-                        <div class="preview-footer" id="previewFooter"> Fuente: — </div>
-                    </div>
-                </div>
-            </section>
-
-        </div>
+<div class="preview-notes" id="previewNotes">
+<div class="notes-title"> Notas </div>
+<p> Configure las notas y fuentes desde el panel izquierdo. </p>
+</div>
+<div class="preview-footer" id="previewFooter"> Fuente: — </div>
+</div>
+</div>
+</section>
+</div>
+</div> <!-- /tsModoCuadros -->
+<div class="d-none ts-query-workspace" id="tsModoConsulta">
+<div class="row g-4">
+<div class="col-lg-5">
+<div class="card border-0 shadow-sm h-100">
+<div class="card-header bg-white border-bottom py-3">
+<div class="d-flex align-items-center gap-2">
+<span class="ts-query-step">1</span>
+<div>
+<h6 class="mb-0">Conexión a base de datos</h6>
+<small class="text-muted">Configure los parámetros de conexión.</small>
+</div>
+</div>
+</div>
+<div class="card-body">
+<div class="row g-3">
+<div class="col-12">
+<label class="form-label">Nombre de la conexión</label>
+<input class="form-control" id="tsSqlNombreConexion" placeholder="Ej. Estadísticas producción"/>
+</div>
+<div class="col-md-7">
+<label class="form-label">Motor de base de datos</label>
+<select class="form-select" id="tsSqlMotor">
+<option value="sqlserver">SQL Server</option>
+<option value="postgresql">PostgreSQL</option>
+<option value="mysql">MySQL</option>
+<option value="oracle">Oracle</option>
+</select>
+</div>
+<div class="col-md-5">
+<label class="form-label">Puerto</label>
+<input class="form-control" id="tsSqlPuerto" inputmode="numeric" value="1433"/>
+</div>
+<div class="col-md-7">
+<label class="form-label">Servidor / Host</label>
+<input class="form-control" id="tsSqlServidor" placeholder="servidor.dominio.local"/>
+</div>
+<div class="col-md-5">
+<label class="form-label">Base de datos</label>
+<input class="form-control" id="tsSqlBase" placeholder="BaseEstadistica"/>
+</div>
+<div class="col-md-6">
+<label class="form-label">Usuario</label>
+<input autocomplete="username" class="form-control" id="tsSqlUsuario" placeholder="usuario"/>
+</div>
+<div class="col-md-6">
+<label class="form-label">Contraseña</label>
+<input autocomplete="current-password" class="form-control" id="tsSqlPassword" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<div class="d-flex flex-wrap align-items-center gap-2 mt-4">
+<button class="btn btn-primary" onclick="ts_sqlProbarConexion()" type="button">
+<i class="bi bi-plug me-1"></i> Probar conexión
+            </button>
+<span class="badge text-bg-secondary" id="tsSqlEstadoConexion">Sin conexión</span>
+</div>
+<div class="alert alert-light border mt-3 mb-0 small text-muted">
+<i class="bi bi-info-circle me-1"></i> En este prototipo la prueba de conexión valida la configuración en el navegador. La conexión real deberá realizarse posteriormente mediante una API segura del servidor.
+          </div>
+</div>
+</div>
+</div>
+<div class="col-lg-7">
+<div class="card border-0 shadow-sm h-100">
+<div class="card-header bg-white border-bottom py-3">
+<div class="d-flex align-items-center gap-2">
+<span class="ts-query-step">2</span>
+<div>
+<h6 class="mb-0">Consulta SQL</h6>
+<small class="text-muted">Escriba la consulta después de validar la conexión.</small>
+</div>
+</div>
+</div>
+<div class="card-body d-flex flex-column">
+<label class="form-label" for="tsSqlConsulta">Consulta</label>
+<textarea class="form-control font-monospace ts-query-editor" disabled="" id="tsSqlConsulta" placeholder="SELECT ... FROM ... WHERE ..." rows="15"></textarea>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3">
+<small class="text-muted" id="tsSqlAyuda">Primero establezca la conexión.</small>
+<button class="btn btn-outline-primary" disabled="" id="tsSqlVerRegistrosBtn" onclick="ts_sqlVerRegistros()" type="button">
+<i class="bi bi-table me-1"></i> Ver registros
+            </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>

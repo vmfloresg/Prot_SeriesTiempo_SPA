@@ -1,5 +1,5 @@
 /*
- * Módulo integrado: Panel Web - Carga y Administración.
+ * Módulo integrado: Carga de archivos.
  * Se encapsula para evitar colisiones con variables y funciones del Proyecto 1.
  */
 let panelWebInicializado = false;

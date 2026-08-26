@@ -391,8 +391,6 @@ function ts_actualizarVistaPrevia() {
 
     ts_actualizarVistaPreviaSeries();
 
-    ts_actualizarGrafica();
-
     ts_actualizarNotas();
 
 }
@@ -409,6 +407,9 @@ function ts_actualizarGrafica() {
             "timeSeriesChart"
         );
 
+    if (!canvas || typeof Chart === "undefined") {
+        return;
+    }
 
     if (ts_chart) {
 
@@ -733,26 +734,6 @@ function ts_vistaCompleta() {
         element.removeAttribute("id");
     });
 
-    /*
-     * Un canvas clonado conserva la etiqueta pero no sus pixeles. Convertimos
-     * la gráfica actual en una imagen para que Vista completa muestre exactamente
-     * lo que el usuario está viendo en la previsualización.
-     */
-    const sourceCanvas = document.getElementById("timeSeriesChart");
-    const clonedCanvas = clone.querySelector("canvas");
-
-    if (sourceCanvas && clonedCanvas) {
-        try {
-            const chartImage = document.createElement("img");
-            chartImage.className = "full-preview-chart-image";
-            chartImage.alt = "Gráfica de la serie de tiempo";
-            chartImage.src = sourceCanvas.toDataURL("image/png");
-            clonedCanvas.replaceWith(chartImage);
-        } catch (error) {
-            /* Si el navegador impide serializar el canvas, se conserva el espacio. */
-            clonedCanvas.classList.add("full-preview-chart-fallback");
-        }
-    }
 
     content.replaceChildren(clone);
 
@@ -771,58 +752,9 @@ function ts_vistaCompleta() {
    ========================================================= */
 
 function ts_guardarConfiguracion() {
-
-    const configuracion = {
-
-        titulo:
-            document.getElementById(
-                "chartTitle"
-            ).value,
-
-        renglón:
-            document.getElementById(
-                "titleRow"
-            ).value,
-
-        alineacion:
-            document.getElementById(
-                "titleAlignment"
-            ).value,
-
-        sangria:
-            document.getElementById(
-                "titleIndent"
-            ).value,
-
-        ts_series,
-
-        ts_datos,
-
-        notas:
-            document.getElementById(
-                "chartNotes"
-            ).value,
-
-        fuente:
-            document.getElementById(
-                "chartSource"
-            ).value
-
-    };
-
-
-    localStorage.setItem(
-        "configuracionSeriesTiempo",
-        JSON.stringify(configuracion)
-    );
-
-
-    ts_mostrarMensaje(
-        "Configuración guardada correctamente.",
-        "success"
-    );
-
+    ts_crudGuardar();
 }
+
 
 
 /* =========================================================
@@ -1849,10 +1781,7 @@ function ts_actualizarVistaPreviaSeries() {
     }
 
 
-    const chartContainer =
-        document.querySelector(
-            "#timeSeriesChart"
-        )?.closest(".chart-container");
+    const chartContainer = null;
 
 
     const seriesContainer =
@@ -1913,16 +1842,13 @@ function ts_actualizarVistaPreviaSeries() {
      * La tabla se coloca antes de la gráfica.
      */
 
-    if (chartContainer) {
-        chartContainer.insertAdjacentElement(
-            "beforebegin",
-            seriesContainer
-        );
-    } else {
-        const previewDocument = document.getElementById("previewDocument");
-        if (previewDocument) {
-            previewDocument.appendChild(seriesContainer);
-        }
+    const previewNotes = document.getElementById("previewNotes");
+    const previewDocument = document.getElementById("previewDocument");
+
+    if (previewNotes) {
+        previewNotes.insertAdjacentElement("beforebegin", seriesContainer);
+    } else if (previewDocument) {
+        previewDocument.appendChild(seriesContainer);
     }
 
 }
@@ -2812,3 +2738,701 @@ function ts_sanitizarNombreArchivo(
 }
 
 
+
+
+/* =========================================================
+   CRUD DE CREACIÓN DE CUADROS Y SERIES
+   Persistencia local, sin alterar las demás vistas de la SPA.
+   ========================================================= */
+
+const TS_CRUD_STORAGE_KEY = "crudCuadrosSeriesV3";
+let ts_crudIdActual = null;
+
+function ts_crudClonar(valor) {
+    return JSON.parse(JSON.stringify(valor ?? null));
+}
+
+function ts_crudLeerRegistros() {
+    try {
+        const raw = localStorage.getItem(TS_CRUD_STORAGE_KEY);
+        const data = raw ? JSON.parse(raw) : [];
+        return Array.isArray(data) ? data : [];
+    } catch (error) {
+        console.error("No fue posible leer los cuadros guardados", error);
+        return [];
+    }
+}
+
+function ts_crudPersistirRegistros(registros) {
+    localStorage.setItem(TS_CRUD_STORAGE_KEY, JSON.stringify(registros));
+    ts_crudActualizarContador();
+}
+
+function ts_crudGenerarId() {
+    const registros = ts_crudLeerRegistros();
+    const numeros = registros
+        .map(r => String(r.id || "").match(/(\d+)$/))
+        .filter(Boolean)
+        .map(m => Number(m[1]));
+    const siguiente = (numeros.length ? Math.max(...numeros) : 0) + 1;
+    return `CS-${String(siguiente).padStart(4, "0")}`;
+}
+
+function ts_crudRecolectarFormulario() {
+    // Sincronizar lo que el usuario ve con el estado antes de guardar.
+    ts_actualizarTitulo();
+    ts_agregarConfiguracionSerieSilenciosa();
+    ts_actualizarNotas();
+    ts_actualizarVistaPreviaSeries();
+
+    const ahora = new Date().toISOString();
+    const registros = ts_crudLeerRegistros();
+    const existente = registros.find(r => r.id === ts_crudIdActual);
+
+    return {
+        id: ts_crudIdActual || ts_crudGenerarId(),
+        creadoEn: existente?.creadoEn || ahora,
+        actualizadoEn: ahora,
+        titulo: {
+            texto: document.getElementById("chartTitle")?.value.trim() || "",
+            renglon: document.getElementById("titleRow")?.value || "1",
+            alineacion: document.getElementById("titleAlignment")?.value || "center",
+            sangria: document.getElementById("titleIndent")?.value || "0"
+        },
+        configuracionSerie: ts_crudClonar(ts_configuracionSerie) || {},
+        seriesDatos: ts_crudClonar(ts_seriesDatos) || [],
+        siguienteSerieId: ts_siguienteSerieId,
+        notas: document.getElementById("chartNotes")?.value || "",
+        fuente: document.getElementById("chartSource")?.value || "",
+        // Se conservan estos arreglos por compatibilidad con configuraciones anteriores.
+        seriesLegacy: ts_crudClonar(ts_series) || [],
+        datosLegacy: ts_crudClonar(ts_datos) || []
+    };
+}
+
+function ts_agregarConfiguracionSerieSilenciosa() {
+    ts_configuracionSerie = {
+        descripcion: document.getElementById("seriesDescription")?.value.trim() || "",
+        decimales: document.getElementById("decimalPlaces")?.value ?? "2",
+        tipoCifra: document.getElementById("figureType")?.value || "",
+        periodicidad: document.getElementById("seriesFrequency")?.value || "",
+        periodoInicio: document.getElementById("availablePeriodStart")?.value || "",
+        periodoFin: document.getElementById("availablePeriodEnd")?.value || "",
+        unidad: document.getElementById("seriesUnit")?.value || ""
+    };
+    ts_actualizarInformacionSerie();
+}
+
+function ts_crudValidar(registro) {
+    if (!registro.titulo.texto) {
+        ts_mostrarMensaje("Capture el título del cuadro antes de guardarlo.", "warning");
+        document.getElementById("chartTitle")?.focus();
+        return false;
+    }
+    if (!registro.configuracionSerie.descripcion) {
+        ts_mostrarMensaje("Capture la descripción del cuadro.", "warning");
+        document.getElementById("seriesDescription")?.focus();
+        return false;
+    }
+    if (!registro.seriesDatos.length) {
+        ts_mostrarMensaje("Agregue al menos una serie de datos a la estructura jerárquica.", "warning");
+        return false;
+    }
+    return true;
+}
+
+function ts_crudGuardar() {
+    const registro = ts_crudRecolectarFormulario();
+    if (!ts_crudValidar(registro)) return;
+
+    const registros = ts_crudLeerRegistros();
+    const index = registros.findIndex(r => r.id === registro.id);
+    const esEdicion = index >= 0;
+
+    if (esEdicion) registros[index] = registro;
+    else registros.push(registro);
+
+    ts_crudPersistirRegistros(registros);
+    ts_crudIdActual = registro.id;
+    ts_crudActualizarEstado();
+    ts_mostrarMensaje(
+        esEdicion ? `Cuadro ${registro.id} actualizado correctamente.` : `Cuadro ${registro.id} creado correctamente.`,
+        "success"
+    );
+}
+
+function ts_crudNuevo() {
+    ts_crudIdActual = null;
+    ts_series = [];
+    ts_datos = [];
+    ts_seriesDatos = [];
+    ts_siguienteSerieId = 1;
+    ts_configuracionSerie = {
+        descripcion: "", decimales: 2, tipoCifra: "", periodicidad: "",
+        periodoInicio: "", periodoFin: "", unidad: ""
+    };
+
+    const valores = {
+        chartTitle: "", titleRow: "1", titleAlignment: "center", titleIndent: "0",
+        seriesDescription: "", decimalPlaces: "2", figureType: "", seriesFrequency: "",
+        availablePeriodStart: "", availablePeriodEnd: "", seriesUnit: "",
+        chartNotes: "", chartSource: "", dataSeriesTitle: "", dataSeriesIndent: "0", parentSeries: ""
+    };
+    Object.entries(valores).forEach(([id, value]) => {
+        const el = document.getElementById(id);
+        if (el) el.value = value;
+    });
+
+    document.querySelectorAll("#tables .afore-check").forEach(c => c.checked = false);
+    const indent = document.getElementById("indentValue");
+    if (indent) indent.textContent = "0";
+    const dataIndent = document.getElementById("dataSeriesIndentValue");
+    if (dataIndent) dataIndent.textContent = "0";
+
+    document.getElementById("seriesInformation")?.remove();
+    document.getElementById("previewSeriesData")?.remove();
+    ts_actualizarTextoAfores();
+    ts_renderizarSeriesConfiguradas();
+    ts_actualizarCatalogoSeriesPadre();
+    ts_actualizarTitulo();
+    ts_actualizarNotas();
+    ts_crudActualizarEstado();
+    ts_mostrarMensaje("Formulario preparado para crear un nuevo cuadro.", "info");
+}
+
+function ts_crudAplicarRegistro(registro) {
+    if (!registro) return;
+    ts_crudIdActual = registro.id;
+
+    const t = registro.titulo || {};
+    const c = registro.configuracionSerie || {};
+    const valores = {
+        chartTitle: t.texto || "",
+        titleRow: t.renglon || "1",
+        titleAlignment: t.alineacion || "center",
+        titleIndent: t.sangria ?? "0",
+        seriesDescription: c.descripcion || "",
+        decimalPlaces: c.decimales ?? "2",
+        figureType: c.tipoCifra || "",
+        seriesFrequency: c.periodicidad || "",
+        availablePeriodStart: c.periodoInicio || "",
+        availablePeriodEnd: c.periodoFin || "",
+        seriesUnit: c.unidad || "",
+        chartNotes: registro.notas || "",
+        chartSource: registro.fuente || ""
+    };
+    Object.entries(valores).forEach(([id, value]) => {
+        const el = document.getElementById(id);
+        if (el) el.value = value;
+    });
+
+    ts_configuracionSerie = ts_crudClonar(c) || {};
+    ts_seriesDatos = ts_crudClonar(registro.seriesDatos) || [];
+    ts_siguienteSerieId = Number(registro.siguienteSerieId) ||
+        (ts_seriesDatos.reduce((max, s) => Math.max(max, Number(s.id) || 0), 0) + 1);
+    ts_series = ts_crudClonar(registro.seriesLegacy) || [];
+    ts_datos = ts_crudClonar(registro.datosLegacy) || [];
+
+    const indent = document.getElementById("indentValue");
+    if (indent) indent.textContent = String(t.sangria ?? 0);
+    ts_deseleccionarTodasAfores();
+    ts_renderizarSeriesConfiguradas();
+    ts_actualizarCatalogoSeriesPadre();
+    ts_actualizarTitulo();
+    ts_actualizarInformacionSerie();
+    ts_actualizarVistaPreviaSeries();
+    ts_actualizarNotas();
+    ts_crudActualizarEstado();
+}
+
+function ts_crudEditar(id) {
+    const registro = ts_crudLeerRegistros().find(r => r.id === id);
+    if (!registro) {
+        ts_mostrarMensaje("El registro solicitado ya no existe.", "warning");
+        return;
+    }
+    const listado = document.getElementById("tsCrudRegistrosModal");
+    if (listado) bootstrap.Modal.getInstance(listado)?.hide();
+    const detalle = document.getElementById("tsCrudDetalleModal");
+    if (detalle) bootstrap.Modal.getInstance(detalle)?.hide();
+    ts_crudAplicarRegistro(registro);
+    ts_mostrarMensaje(`Editando ${id}. Los cambios se guardarán sobre el mismo registro.`, "info");
+}
+
+function ts_crudEliminar(id) {
+    const registros = ts_crudLeerRegistros();
+    const registro = registros.find(r => r.id === id);
+    if (!registro) return;
+    const titulo = registro.titulo?.texto || id;
+    if (!confirm(`¿Desea eliminar el cuadro “${titulo}”?\n\nEsta acción no se puede deshacer.`)) return;
+
+    ts_crudPersistirRegistros(registros.filter(r => r.id !== id));
+    if (ts_crudIdActual === id) ts_crudNuevo();
+    ts_crudRenderizarRegistros();
+    ts_mostrarMensaje(`Cuadro ${id} eliminado.`, "success");
+}
+
+function ts_crudAbrirRegistros() {
+    ts_crudRenderizarRegistros();
+    const modal = document.getElementById("tsCrudRegistrosModal");
+    if (modal) bootstrap.Modal.getOrCreateInstance(modal).show();
+}
+
+function ts_crudRenderizarRegistros() {
+    const body = document.getElementById("tsCrudRegistrosBody");
+    const empty = document.getElementById("tsCrudSinRegistros");
+    if (!body || !empty) return;
+
+    const query = (document.getElementById("tsCrudBuscar")?.value || "").trim().toLowerCase();
+    const registros = ts_crudLeerRegistros()
+        .filter(r => {
+            const c = r.configuracionSerie || {};
+            return [r.id, r.titulo?.texto, c.descripcion, c.periodicidad, c.unidad]
+                .some(v => String(v || "").toLowerCase().includes(query));
+        })
+        .sort((a,b) => String(b.actualizadoEn || "").localeCompare(String(a.actualizadoEn || "")));
+
+    body.innerHTML = "";
+    empty.classList.toggle("d-none", registros.length !== 0);
+
+    registros.forEach(registro => {
+        const c = registro.configuracionSerie || {};
+        const inicio = ts_formatearPeriodo(c.periodoInicio);
+        const fin = ts_formatearPeriodo(c.periodoFin);
+        const periodo = inicio === "—" && fin === "—" ? "—" : `${inicio} – ${fin}`;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><span class="badge text-bg-light border">${ts_escapeHtml(registro.id)}</span></td>
+            <td>
+              <div class="fw-semibold">${ts_escapeHtml(registro.titulo?.texto || "Sin título")}</div>
+              <small class="text-muted ts-crud-description">${ts_escapeHtml(c.descripcion || "Sin descripción")}</small>
+            </td>
+            <td>${ts_escapeHtml(c.periodicidad || "—")}</td>
+            <td class="text-nowrap">${ts_escapeHtml(periodo)}</td>
+            <td class="text-center"><span class="badge text-bg-primary">${(registro.seriesDatos || []).length}</span></td>
+            <td class="text-nowrap"><small>${ts_crudFecha(registro.actualizadoEn)}</small></td>
+            <td class="text-end text-nowrap">
+              <button class="btn btn-sm btn-outline-secondary" title="Consultar" onclick="ts_crudConsultar('${registro.id}')"><i class="bi bi-eye"></i></button>
+              <button class="btn btn-sm btn-outline-primary ms-1" title="Editar" onclick="ts_crudEditar('${registro.id}')"><i class="bi bi-pencil-square"></i></button>
+              <button class="btn btn-sm btn-outline-danger ms-1" title="Eliminar" onclick="ts_crudEliminar('${registro.id}')"><i class="bi bi-trash"></i></button>
+            </td>`;
+        body.appendChild(tr);
+    });
+}
+
+function ts_crudConsultar(id) {
+    const registro = ts_crudLeerRegistros().find(r => r.id === id);
+    if (!registro) return;
+    const container = document.getElementById("tsCrudDetalleContenido");
+    if (!container) return;
+    container.innerHTML = ts_crudConstruirDetalle(registro);
+    const editar = document.getElementById("tsCrudDetalleEditar");
+    if (editar) editar.onclick = () => ts_crudEditar(id);
+    const listado = document.getElementById("tsCrudRegistrosModal");
+    if (listado) bootstrap.Modal.getInstance(listado)?.hide();
+    bootstrap.Modal.getOrCreateInstance(document.getElementById("tsCrudDetalleModal")).show();
+}
+
+function ts_crudConstruirDetalle(registro) {
+    const c = registro.configuracionSerie || {};
+    const inicio = ts_formatearPeriodo(c.periodoInicio);
+    const fin = ts_formatearPeriodo(c.periodoFin);
+    const periodo = inicio === "—" && fin === "—" ? "—" : `${inicio} – ${fin}`;
+    return `
+      <article class="ts-crud-detail preview-document">
+        <div class="d-flex justify-content-between gap-3 align-items-start mb-3">
+          <div>
+            <div class="preview-title text-start p-0 m-0">${ts_escapeHtml(registro.titulo?.texto || "Sin título")}</div>
+            <div class="text-muted small mt-1">Clave: ${ts_escapeHtml(registro.id)}</div>
+          </div>
+          <span class="badge text-bg-light border">Actualizado ${ts_crudFecha(registro.actualizadoEn)}</span>
+        </div>
+        <section class="series-information mb-4">
+          <div class="series-information-title"><i class="bi bi-info-circle"></i><span>Información del cuadro / serie</span></div>
+          <div class="series-information-grid">
+            <div class="series-information-item series-information-description"><div class="series-information-label">Descripción</div><div class="series-information-value">${ts_escapeHtml(c.descripcion || "—")}</div></div>
+            <div class="series-information-item"><div class="series-information-label">Número de decimales</div><div class="series-information-value">${ts_escapeHtml(String(c.decimales ?? "—"))}</div></div>
+            <div class="series-information-item"><div class="series-information-label">Tipo de cifra</div><div class="series-information-value">${ts_escapeHtml(c.tipoCifra || "—")}</div></div>
+            <div class="series-information-item"><div class="series-information-label">Periodicidad</div><div class="series-information-value">${ts_escapeHtml(c.periodicidad || "—")}</div></div>
+            <div class="series-information-item"><div class="series-information-label">Periodo disponible</div><div class="series-information-value">${ts_escapeHtml(periodo)}</div></div>
+            <div class="series-information-item"><div class="series-information-label">Unidad de medida</div><div class="series-information-value">${ts_escapeHtml(c.unidad || "—")}</div></div>
+          </div>
+        </section>
+        ${ts_crudConstruirJerarquiaHTML(registro.seriesDatos || [])}
+        <div class="preview-notes mt-4"><div class="notes-title">Notas</div><p>${ts_escapeHtml(registro.notas || "—")}</p></div>
+        <div class="preview-footer">Fuente: ${ts_escapeHtml(registro.fuente || "—")}</div>
+      </article>`;
+}
+
+function ts_crudConstruirJerarquiaHTML(series) {
+    if (!series.length) return '<div class="alert alert-light border">No existen series de datos configuradas.</div>';
+    const out = [];
+    out.push('<div class="preview-series-data ts-crud-hierarchy">');
+    out.push('<div class="preview-series-header"><div class="preview-concept">CONCEPTO</div><div>JUNIO 2025</div><div>MAYO 2026</div><div>JUNIO 2026</div></div>');
+    const roots = series.filter(s => s.parentId === null || s.parentId === undefined || s.parentId === "");
+    const render = serie => {
+        const indent = Number(serie.indent) || 0;
+        out.push(`<div class="preview-series-row preview-series-title-row"><div class="preview-concept" style="padding-left:${indent*24+8}px"><span class="preview-checkbox">□</span>${ts_escapeHtml(serie.title || "Serie")}</div><div></div><div></div><div></div></div>`);
+        (serie.afores || []).forEach((afore,index) => {
+            const base = ts_obtenerValorEjemplo(serie.id,index);
+            out.push(`<div class="preview-series-row preview-afore-row"><div class="preview-concept" style="padding-left:${(indent+1)*24+8}px"><span class="preview-checkbox">□</span>${ts_escapeHtml(afore)}</div><div>${ts_formatearNumero(base)}</div><div>${ts_formatearNumero(base*1.035)}</div><div>${ts_formatearNumero(base*1.041)}</div></div>`);
+        });
+        series.filter(s => String(s.parentId) === String(serie.id)).forEach(render);
+    };
+    roots.forEach(render);
+    out.push('</div>');
+    return out.join('');
+}
+
+function ts_crudFecha(valor) {
+    if (!valor) return "—";
+    const fecha = new Date(valor);
+    if (Number.isNaN(fecha.getTime())) return "—";
+    return fecha.toLocaleString("es-MX", { dateStyle: "short", timeStyle: "short" });
+}
+
+function ts_crudActualizarContador() {
+    const el = document.getElementById("tsCrudContador");
+    if (el) el.textContent = String(ts_crudLeerRegistros().length);
+}
+
+function ts_crudActualizarEstado() {
+    const estado = document.getElementById("tsCrudEstado");
+    const panel = document.getElementById("tsCrudModoPanel");
+    const boton = document.getElementById("tsCrudGuardarBtn");
+    const edicion = Boolean(ts_crudIdActual);
+    if (estado) {
+        estado.textContent = edicion ? `Editando ${ts_crudIdActual}` : "Nuevo registro";
+        estado.className = edicion ? "badge rounded-pill text-bg-warning" : "badge rounded-pill text-bg-light border";
+    }
+    if (panel) panel.innerHTML = edicion
+        ? '<i class="bi bi-circle-fill"></i> Edición'
+        : '<i class="bi bi-circle-fill"></i> Nuevo';
+    if (boton) boton.innerHTML = edicion
+        ? '<i class="bi bi-save me-1"></i> Actualizar'
+        : '<i class="bi bi-save me-1"></i> Guardar';
+    ts_crudActualizarContador();
+}
+
+function ts_crudMigrarConfiguracionAnterior() {
+    if (localStorage.getItem("tsCrudMigracionV3") === "1") return;
+    const registros = ts_crudLeerRegistros();
+    if (registros.length === 0) {
+        try {
+            const raw = localStorage.getItem("configuracionSeriesTiempo");
+            if (raw) {
+                const antigua = JSON.parse(raw);
+                if (antigua && antigua.titulo) {
+                    registros.push({
+                        id: ts_crudGenerarId(),
+                        creadoEn: new Date().toISOString(),
+                        actualizadoEn: new Date().toISOString(),
+                        titulo: { texto: antigua.titulo || "Configuración anterior", renglon: antigua["renglón"] || "1", alineacion: antigua.alineacion || "center", sangria: antigua.sangria || "0" },
+                        configuracionSerie: { descripcion: "Configuración migrada desde una versión anterior", decimales: 2, tipoCifra: "", periodicidad: "", periodoInicio: "", periodoFin: "", unidad: "" },
+                        seriesDatos: [], siguienteSerieId: 1,
+                        notas: antigua.notas || "", fuente: antigua.fuente || "",
+                        seriesLegacy: antigua.ts_series || [], datosLegacy: antigua.ts_datos || []
+                    });
+                    ts_crudPersistirRegistros(registros);
+                }
+            }
+        } catch (error) {
+            console.warn("No se pudo migrar la configuración anterior", error);
+        }
+    }
+    localStorage.setItem("tsCrudMigracionV3", "1");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    ts_crudMigrarConfiguracionAnterior();
+    ts_crudActualizarEstado();
+});
+
+/* =========================================================
+   MODO NUEVA CONSULTA SQL
+   ========================================================= */
+let ts_sqlConexionActiva = false;
+
+function ts_mostrarModoCuadros(crearNuevo = false) {
+    const cuadros = document.getElementById('tsModoCuadros');
+    const consulta = document.getElementById('tsModoConsulta');
+    const actualizar = document.getElementById('tsCrudActualizarBtn');
+    const guardar = document.getElementById('tsCrudGuardarBtn');
+
+    cuadros?.classList.remove('d-none');
+    consulta?.classList.add('d-none');
+    actualizar?.classList.remove('d-none');
+    guardar?.classList.remove('d-none');
+
+    if (crearNuevo && typeof ts_crudNuevo === 'function') {
+        ts_crudNuevo();
+    }
+}
+
+function ts_mostrarModoConsulta() {
+    const cuadros = document.getElementById('tsModoCuadros');
+    const consulta = document.getElementById('tsModoConsulta');
+    const actualizar = document.getElementById('tsCrudActualizarBtn');
+    const guardar = document.getElementById('tsCrudGuardarBtn');
+
+    cuadros?.classList.add('d-none');
+    consulta?.classList.remove('d-none');
+    actualizar?.classList.add('d-none');
+    guardar?.classList.add('d-none');
+
+    // La pantalla inicia sin una conexión validada.
+    ts_sqlRestablecerEstadoConexion(false);
+}
+
+function ts_sqlRestablecerEstadoConexion(limpiarCampos = false) {
+    ts_sqlConexionActiva = false;
+    const estado = document.getElementById('tsSqlEstadoConexion');
+    const consulta = document.getElementById('tsSqlConsulta');
+    const verRegistros = document.getElementById('tsSqlVerRegistrosBtn');
+    const guardarConsulta = document.getElementById('tsSqlGuardarBtn');
+    const ayuda = document.getElementById('tsSqlAyuda');
+
+    if (estado) {
+        estado.textContent = 'Sin conexión';
+        estado.className = 'badge text-bg-secondary';
+    }
+    if (consulta) consulta.disabled = true;
+    if (verRegistros) verRegistros.disabled = true;
+    if (guardarConsulta) guardarConsulta.disabled = true;
+    if (ayuda) ayuda.textContent = 'Primero establezca la conexión.';
+
+    if (limpiarCampos) {
+        ['tsSqlNombreConexion','tsSqlServidor','tsSqlBase','tsSqlUsuario','tsSqlPassword','tsSqlConsulta']
+            .forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+        const motor = document.getElementById('tsSqlMotor');
+        const puerto = document.getElementById('tsSqlPuerto');
+        if (motor) motor.value = 'sqlserver';
+        if (puerto) puerto.value = '1433';
+    }
+}
+
+function ts_sqlPuertoPorMotor(motor) {
+    return {
+        sqlserver: '1433',
+        postgresql: '5432',
+        mysql: '3306',
+        oracle: '1521'
+    }[motor] || '';
+}
+
+function ts_sqlProbarConexion() {
+    const servidor = document.getElementById('tsSqlServidor')?.value.trim();
+    const base = document.getElementById('tsSqlBase')?.value.trim();
+    const usuario = document.getElementById('tsSqlUsuario')?.value.trim();
+    const motor = document.getElementById('tsSqlMotor')?.value || 'sqlserver';
+    const estado = document.getElementById('tsSqlEstadoConexion');
+    const consulta = document.getElementById('tsSqlConsulta');
+    const verRegistros = document.getElementById('tsSqlVerRegistrosBtn');
+    const guardarConsulta = document.getElementById('tsSqlGuardarBtn');
+    const ayuda = document.getElementById('tsSqlAyuda');
+
+    if (!servidor || !base || !usuario) {
+        ts_sqlConexionActiva = false;
+        if (estado) {
+            estado.textContent = 'Datos incompletos';
+            estado.className = 'badge text-bg-danger';
+        }
+        if (consulta) consulta.disabled = true;
+        if (verRegistros) verRegistros.disabled = true;
+        if (guardarConsulta) guardarConsulta.disabled = true;
+        if (ayuda) ayuda.textContent = 'Capture servidor, base de datos y usuario para continuar.';
+        return;
+    }
+
+    // Prototipo front-end: la conexión real debe ejecutarse mediante una API/backend.
+    ts_sqlConexionActiva = true;
+    if (estado) {
+        estado.textContent = `Conectado · ${motor.toUpperCase()}`;
+        estado.className = 'badge text-bg-success';
+    }
+    if (consulta) {
+        consulta.disabled = false;
+        if (!consulta.value.trim()) {
+            consulta.value = 'SELECT TOP 100 *\nFROM CuadrosEstadisticos\nORDER BY FechaPeriodo DESC;';
+        }
+        consulta.focus();
+    }
+    if (verRegistros) verRegistros.disabled = false;
+    if (guardarConsulta) guardarConsulta.disabled = false;
+    if (ayuda) ayuda.textContent = 'Conexión validada. Escriba una consulta SELECT, guárdela o visualice los registros.';
+}
+
+
+function ts_sqlGuardarConsulta() {
+    if (!ts_sqlConexionActiva) {
+        ts_sqlProbarConexion();
+        if (!ts_sqlConexionActiva) return;
+    }
+
+    const sql = document.getElementById('tsSqlConsulta')?.value.trim() || '';
+    const ayuda = document.getElementById('tsSqlAyuda');
+
+    if (!sql) {
+        if (ayuda) ayuda.textContent = 'Escriba una consulta SQL antes de guardarla.';
+        return;
+    }
+
+    const registro = {
+        id: 'SQL-' + Date.now(),
+        nombre: document.getElementById('tsSqlNombreConexion')?.value.trim() || 'Consulta SQL',
+        motor: document.getElementById('tsSqlMotor')?.value || 'sqlserver',
+        puerto: document.getElementById('tsSqlPuerto')?.value.trim() || '',
+        servidor: document.getElementById('tsSqlServidor')?.value.trim() || '',
+        baseDatos: document.getElementById('tsSqlBase')?.value.trim() || '',
+        usuario: document.getElementById('tsSqlUsuario')?.value.trim() || '',
+        consulta: sql,
+        fechaActualizacion: new Date().toISOString()
+    };
+
+    // No se guarda la contraseña en localStorage.
+    const clave = 'consultasSqlGuardadas';
+    let registros = [];
+    try {
+        registros = JSON.parse(localStorage.getItem(clave) || '[]');
+        if (!Array.isArray(registros)) registros = [];
+    } catch (error) {
+        registros = [];
+    }
+
+    const existente = registros.findIndex(item =>
+        item.nombre === registro.nombre &&
+        item.servidor === registro.servidor &&
+        item.baseDatos === registro.baseDatos
+    );
+
+    if (existente >= 0) {
+        registro.id = registros[existente].id;
+        registros[existente] = registro;
+    } else {
+        registros.push(registro);
+    }
+
+    localStorage.setItem(clave, JSON.stringify(registros));
+
+    if (ayuda) {
+        ayuda.textContent = existente >= 0
+            ? 'Consulta SQL actualizada correctamente.'
+            : 'Consulta SQL guardada correctamente.';
+    }
+}
+
+function ts_sqlVerRegistros() {
+    const sql = document.getElementById('tsSqlConsulta')?.value.trim() || '';
+    if (!ts_sqlConexionActiva) {
+        ts_sqlProbarConexion();
+        if (!ts_sqlConexionActiva) return;
+    }
+    if (!sql) {
+        const ayuda = document.getElementById('tsSqlAyuda');
+        if (ayuda) ayuda.textContent = 'Escriba una consulta SQL antes de visualizar los registros.';
+        return;
+    }
+    if (!/^\s*(select|with)\b/i.test(sql)) {
+        const ayuda = document.getElementById('tsSqlAyuda');
+        if (ayuda) ayuda.textContent = 'Para este prototipo utilice una consulta de lectura (SELECT o WITH).';
+        return;
+    }
+
+    const datos = ts_sqlDatosDemostracion(sql);
+    ts_sqlRenderizarResultado(datos);
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('tsSqlRegistrosModal')).show();
+}
+
+function ts_sqlDatosDemostracion(sql) {
+    // Datos ficticios para representar la respuesta que entregará la futura API.
+    return [
+        { id: 1001, periodo: '2026-06', afore: 'Azteca', concepto: 'Recursos administrados', valor: '79,995,325.40', estatus: 'Vigente' },
+        { id: 1002, periodo: '2026-06', afore: 'Banamex', concepto: 'Recursos administrados', valor: '71,650,574.12', estatus: 'Vigente' },
+        { id: 1003, periodo: '2026-06', afore: 'Coppel', concepto: 'Recursos administrados por tipo', valor: '17,894,216.08', estatus: 'Vigente' },
+        { id: 1004, periodo: '2026-06', afore: 'Inbursa', concepto: 'Recursos administrados por tipo', valor: '8,946,721.55', estatus: 'Vigente' },
+        { id: 1005, periodo: '2026-05', afore: 'Azteca', concepto: 'Recursos administrados', valor: '79,611,694.33', estatus: 'Vigente' }
+    ];
+}
+
+function ts_sqlRenderizarResultado(registros) {
+    const head = document.getElementById('tsSqlResultadoHead');
+    const body = document.getElementById('tsSqlResultadoBody');
+    const resumen = document.getElementById('tsSqlResumenResultado');
+    if (!head || !body) return;
+
+    const columnas = registros.length ? Object.keys(registros[0]) : [];
+    head.innerHTML = `<tr>${columnas.map(c => `<th>${ts_sqlEscape(c)}</th>`).join('')}</tr>`;
+    body.innerHTML = registros.length
+        ? registros.map(r => `<tr>${columnas.map(c => `<td>${ts_sqlEscape(r[c])}</td>`).join('')}</tr>`).join('')
+        : `<tr><td colspan="${Math.max(columnas.length,1)}" class="text-center text-muted py-4">Sin registros</td></tr>`;
+
+    if (resumen) {
+        const nombre = document.getElementById('tsSqlNombreConexion')?.value.trim() || 'Conexión actual';
+        resumen.textContent = `${nombre} · ${registros.length} registro${registros.length === 1 ? '' : 's'} encontrados`;
+    }
+}
+
+function ts_sqlEscape(valor) {
+    return String(valor ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+// Ajusta automáticamente el puerto al cambiar el motor.
+document.addEventListener('change', function (event) {
+    if (event.target?.id === 'tsSqlMotor') {
+        const puerto = document.getElementById('tsSqlPuerto');
+        if (puerto) puerto.value = ts_sqlPuertoPorMotor(event.target.value);
+        ts_sqlRestablecerEstadoConexion(false);
+    }
+});
+
+// Si se modifica cualquier parámetro después de conectar, se obliga a validar otra vez.
+document.addEventListener('input', function (event) {
+    if (['tsSqlServidor','tsSqlBase','tsSqlUsuario','tsSqlPassword','tsSqlPuerto'].includes(event.target?.id) && ts_sqlConexionActiva) {
+        ts_sqlRestablecerEstadoConexion(false);
+    }
+});
+
+
+// ===== MENÚ NUEVO: control propio, independiente de Bootstrap =====
+function ts_toggleNuevoMenu(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    const btn = document.getElementById('tsNuevoBtn');
+    const menu = document.getElementById('tsNuevoMenu');
+    if (!btn || !menu) return;
+
+    const abierto = menu.classList.contains('show');
+    ts_cerrarNuevoMenu();
+    if (!abierto) {
+        menu.classList.add('show');
+        btn.setAttribute('aria-expanded', 'true');
+    }
+}
+
+function ts_cerrarNuevoMenu() {
+    const btn = document.getElementById('tsNuevoBtn');
+    const menu = document.getElementById('tsNuevoMenu');
+    if (menu) menu.classList.remove('show');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+
+document.addEventListener('click', function(event) {
+    const contenedor = document.querySelector('#tables .ts-nuevo-dropdown');
+    if (contenedor && !contenedor.contains(event.target)) {
+        ts_cerrarNuevoMenu();
+    }
+});
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') ts_cerrarNuevoMenu();
+});

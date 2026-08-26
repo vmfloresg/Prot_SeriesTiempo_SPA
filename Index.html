@@ -97,20 +97,14 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#" data-view="panel-web">
-                                <i class="bi bi-window-stack me-2"></i> Carga de archivos.
+                                <i class="bi bi-upload me-2"></i> Panel Web - Carga y Administración
                             </a>
                         </li>
-                        <!-- <li class="nav-item">
-                            <a class="nav-link" href="#" data-view="upload">
-                                <i class="bi bi-upload me-2"></i> Carga de archivos
-                            </a>
-                        </li> -->
                         <li class="nav-item">
                             <a class="nav-link" href="#" data-view="tables">
                                 <i class="bi bi-table me-2"></i> Creación de cuadros y series
                             </a>
                         </li>
-                        
                         <li class="nav-item">
                             <a class="nav-link" href="#" data-view="publish">
                                 <i class="bi bi-eye me-2"></i> Publicación de cuadros
@@ -158,7 +152,7 @@
         <div class="card-body py-2">
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
                 <div>
-                    <h5 class="mb-0">Panel Web - Carga y Administración</h5>
+                    <h5 class="mb-0">Carga de archivos</h5>
                     <small class="text-muted">Funcionalidad integrada como módulo de la aplicación SPA.</small>
                 </div>
                 <ul class="nav nav-pills" id="mainMenu">
@@ -1117,19 +1111,44 @@
                     <!-- Creación de cuadros y series -->
                     <div id="tables" class="app-view d-none">
 
-<div class="card border-0 shadow-sm mb-3">
+<div class="card border-0 shadow-sm mb-3 ts-crud-toolbar">
   <div class="card-body py-2">
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
       <div>
-        <h5 class="mb-0"><i class="bi bi-bar-chart-line me-2"></i>Constructor de cuadros y series</h5>
-        <small class="text-muted">Configuración y previsualización de series de tiempo.</small>
+        <h5 class="mb-0"><i class="bi bi-table me-2"></i>Creación de cuadros y series</h5>
+        <small class="text-muted">Alta, consulta, edición y eliminación de cuadros con estructura jerárquica de series.</small>
       </div>
-      <button type="button" class="btn btn-primary btn-sm" onclick="ts_guardarConfiguracion()">
-        <i class="bi bi-save me-1"></i> Guardar configuración
-      </button>
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <div class="dropdown ts-nuevo-dropdown">
+          <button type="button" id="tsNuevoBtn" class="btn btn-outline-primary btn-sm dropdown-toggle"
+                  aria-expanded="false" aria-controls="tsNuevoMenu" onclick="ts_toggleNuevoMenu(event)">
+            <i class="bi bi-file-earmark-plus me-1"></i> Nuevo
+          </button>
+          <ul id="tsNuevoMenu" class="dropdown-menu dropdown-menu-end shadow-sm">
+            <li>
+              <button type="button" class="dropdown-item" onclick="ts_mostrarModoCuadros(true); ts_cerrarNuevoMenu();">
+                <i class="bi bi-table me-2"></i> Creación de cuadros y series
+              </button>
+            </li>
+            <li>
+              <button type="button" class="dropdown-item" onclick="ts_mostrarModoConsulta(); ts_cerrarNuevoMenu();">
+                <i class="bi bi-database-add me-2"></i> Crear nueva consulta
+              </button>
+            </li>
+          </ul>
+        </div>
+        <button type="button" id="tsCrudActualizarBtn" class="btn btn-outline-secondary btn-sm" onclick="ts_crudAbrirRegistros()">
+          <i class="bi bi-arrow-repeat me-1"></i> Actualizar
+          <span id="tsCrudContador" class="badge text-bg-secondary ms-1">0</span>
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" id="tsCrudGuardarBtn" onclick="ts_crudGuardar()">
+          <i class="bi bi-save me-1"></i> Guardar
+        </button>
+      </div>
     </div>
   </div>
 </div>
+<div id="tsModoCuadros">
 <div class="row g-0 workspace">
             <!-- ================================================= -->
 
@@ -1142,7 +1161,7 @@
                     <div>
                         <h2> Configuración </h2>
                         <p> Define los elementos que compondrán el cuadro. </p>
-                    </div> <span class="configuration-status"> <i class="bi bi-circle-fill"></i> Edición </span>
+                    </div> <span class="configuration-status" id="tsCrudModoPanel"> <i class="bi bi-circle-fill"></i> Nuevo </span>
                 </div>
                 <div class="accordion accordion-flush" id="configurationAccordion">
 
@@ -1151,11 +1170,11 @@
                     <!-- ================================================= -->
 
                     <div class="accordion-item">
-                        <h2 class="accordion-header"> <button class="accordion-button" type="button"
-                                data-bs-toggle="collapse" data-bs-target="#sectionTitle"> <span
+                        <h2 class="accordion-header"> <button class="accordion-button collapsed" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#sectionTitle" aria-expanded="false"> <span
                                     class="section-number">1</span> <span> <strong>Título del cuadro</strong>
                                     <small>Configuración del encabezado</small> </span> </button> </h2>
-                        <div id="sectionTitle" class="accordion-collapse collapse show"
+                        <div id="sectionTitle" class="accordion-collapse collapse"
                             data-bs-parent="#configurationAccordion">
                             <div class="accordion-body">
                                 <div class="mb-3"> <label class="form-label"> Título </label> <input type="text"
@@ -1234,7 +1253,7 @@
                                         <option value="Semestral"> Semestral </option>
                                         <option value="Anual"> Anual </option>
                                     </select> </div> <!-- PERIODO DISPONIBLE -->
-                                <div class="mb-3"> <label class="form-label"> Periodo requerido </label>
+                                <div class="mb-3"> <label class="form-label"> Periodo disponible </label>
                                     <div class="row g-2">
                                         <div class="col-6"> <input
                                                 type="month" id="availablePeriodStart" class="form-control"> </div>
@@ -1654,8 +1673,8 @@
                         <div class="dropdown">
                             <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown"
                                 aria-expanded="false">
-                                <i class="bi bi-download"></i>
-                                Exportar
+                                <i class="bi bi-file-earmark-arrow-down"></i>
+                                Genera plantilla
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end export-menu">
                                 <li>
@@ -1694,7 +1713,6 @@
                         <div class="preview-title" id="previewTitle"> Evolución de las series de tiempo </div>
                         <div class="preview-meta" id="previewMeta"> <span> <i class="bi bi-calendar3"></i> Periodicidad:
                                 Mensual </span> <span> <i class="bi bi-database"></i> Fuente: — </span> </div>
-                        <div class="chart-container"> <canvas id="timeSeriesChart"></canvas> </div>
                         <div class="preview-notes" id="previewNotes">
                             <div class="notes-title"> Notas </div>
                             <p> Configure las notas y fuentes desde el panel izquierdo. </p>
@@ -1705,6 +1723,101 @@
             </section>
 
         </div>
+</div> <!-- /tsModoCuadros -->
+
+<div id="tsModoConsulta" class="d-none ts-query-workspace">
+  <div class="row g-4">
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-bottom py-3">
+          <div class="d-flex align-items-center gap-2">
+            <span class="ts-query-step">1</span>
+            <div>
+              <h6 class="mb-0">Conexión a base de datos</h6>
+              <small class="text-muted">Configure los parámetros de conexión.</small>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Nombre de la conexión</label>
+              <input id="tsSqlNombreConexion" class="form-control" placeholder="Ej. Estadísticas producción">
+            </div>
+            <div class="col-md-7">
+              <label class="form-label">Motor de base de datos</label>
+              <select id="tsSqlMotor" class="form-select">
+                <option value="sqlserver">SQL Server</option>
+                <option value="postgresql">PostgreSQL</option>
+                <option value="mysql">MySQL</option>
+                <option value="oracle">Oracle</option>
+              </select>
+            </div>
+            <div class="col-md-5">
+              <label class="form-label">Puerto</label>
+              <input id="tsSqlPuerto" class="form-control" value="1433" inputmode="numeric">
+            </div>
+            <div class="col-md-7">
+              <label class="form-label">Servidor / Host</label>
+              <input id="tsSqlServidor" class="form-control" placeholder="servidor.dominio.local">
+            </div>
+            <div class="col-md-5">
+              <label class="form-label">Base de datos</label>
+              <input id="tsSqlBase" class="form-control" placeholder="BaseEstadistica">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Usuario</label>
+              <input id="tsSqlUsuario" class="form-control" autocomplete="username" placeholder="usuario">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Contraseña</label>
+              <input id="tsSqlPassword" type="password" class="form-control" autocomplete="current-password" placeholder="••••••••">
+            </div>
+          </div>
+          <div class="d-flex flex-wrap align-items-center gap-2 mt-4">
+            <button class="btn btn-primary" type="button" onclick="ts_sqlProbarConexion()">
+              <i class="bi bi-plug me-1"></i> Probar conexión
+            </button>
+            <span id="tsSqlEstadoConexion" class="badge text-bg-secondary">Sin conexión</span>
+          </div>
+          <div class="alert alert-light border mt-3 mb-0 small text-muted">
+            <i class="bi bi-info-circle me-1"></i> En este prototipo la prueba de conexión valida la configuración en el navegador. La conexión real deberá realizarse posteriormente mediante una API segura del servidor.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-white border-bottom py-3">
+          <div class="d-flex align-items-center gap-2">
+            <span class="ts-query-step">2</span>
+            <div>
+              <h6 class="mb-0">Consulta SQL</h6>
+              <small class="text-muted">Escriba la consulta después de validar la conexión.</small>
+            </div>
+          </div>
+        </div>
+        <div class="card-body d-flex flex-column">
+          <label class="form-label" for="tsSqlConsulta">Consulta</label>
+          <textarea id="tsSqlConsulta" class="form-control font-monospace ts-query-editor" rows="15" disabled placeholder="SELECT ... FROM ... WHERE ..."></textarea>
+          <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3">
+            <small id="tsSqlAyuda" class="text-muted">Primero establezca la conexión.</small>
+            <div class="d-flex flex-wrap gap-2">
+              <button id="tsSqlVerRegistrosBtn" class="btn btn-outline-primary" type="button" disabled onclick="ts_sqlVerRegistros()">
+                <i class="bi bi-table me-1"></i> Ver registros
+              </button>
+              <button id="tsSqlGuardarBtn" class="btn btn-primary" type="button" disabled onclick="ts_sqlGuardarConsulta()">
+                <i class="bi bi-save me-1"></i> Guardar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </div>
 
                     <!-- Publicación de cuadros -->
@@ -2116,7 +2229,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/app.js"></script>
     <script src="js/modules/panel-web.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -2380,6 +2492,99 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/app.js"></script>
+
+
+<!-- CRUD: listado de cuadros y series -->
+<!-- Modal resultados de consulta SQL -->
+<div class="modal fade" id="tsSqlRegistrosModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title"><i class="bi bi-table me-2"></i>Registros de la consulta</h5>
+          <small id="tsSqlResumenResultado" class="text-muted"></small>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="table-responsive border rounded">
+          <table class="table table-hover table-striped align-middle mb-0">
+            <thead class="table-light" id="tsSqlResultadoHead"></thead>
+            <tbody id="tsSqlResultadoBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="tsCrudRegistrosModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title mb-0"><i class="bi bi-table me-2"></i>Cuadros y series registrados</h5>
+          <small class="text-muted">Consulte, edite o elimine configuraciones guardadas.</small>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group mb-3">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="search" id="tsCrudBuscar" class="form-control" placeholder="Buscar por título, descripción, periodicidad o unidad..." oninput="ts_crudRenderizarRegistros()">
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle ts-crud-table">
+            <thead>
+              <tr>
+                <th style="width:110px">Clave</th>
+                <th>Cuadro / serie</th>
+                <th>Periodicidad</th>
+                <th>Periodo</th>
+                <th class="text-center">Series</th>
+                <th>Actualizado</th>
+                <th class="text-end" style="width:210px">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tsCrudRegistrosBody"></tbody>
+          </table>
+        </div>
+        <div id="tsCrudSinRegistros" class="text-center text-muted py-5 d-none">
+          <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+          No existen cuadros registrados.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="ts_crudNuevo()">
+          <i class="bi bi-plus-circle me-1"></i> Nuevo cuadro
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CRUD: consulta de un cuadro -->
+<div class="modal fade" id="tsCrudDetalleModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-eye me-2"></i>Consulta del cuadro / serie</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" id="tsCrudDetalleContenido"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-primary" id="tsCrudDetalleEditar">
+          <i class="bi bi-pencil-square me-1"></i> Editar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="modal fade" id="fullPreviewModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered">

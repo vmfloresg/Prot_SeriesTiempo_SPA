@@ -8,9 +8,8 @@ let usuarios = [
 
 const modulosSistema = [
   { id: 'home', nombre: 'Inicio', descripcion: 'Página de inicio del sistema' },
-  { id: 'upload', nombre: 'Carga de archivos', descripcion: 'Carga de archivos Financieros, Operaciones y SQL' },
   { id: 'tables', nombre: 'Creación de cuadros y series', descripcion: 'Crear y gestionar cuadros y series de tiempo' },
-  { id: 'panel-web', nombre: 'Panel Web - Carga y Administración', descripcion: 'Carga de archivos, editor y administración integrados' },
+  { id: 'panel-web', nombre: 'Carga de archivos', descripcion: 'Carga de archivos, editor y administración integrados' },
   { id: 'publish', nombre: 'Publicación de cuadros', descripcion: 'Publicar cuadros para visualización' },
   { id: 'editor', nombre: 'Editor de páginas web', descripcion: 'Editor para crear y modificar páginas' },
   { id: 'reports', nombre: 'Consulta y generación de reportes', descripcion: 'Generar reportes en múltiples formatos' },
@@ -608,11 +607,37 @@ function showView(view){
   const vistaElement=document.getElementById(view);
   if(!vistaElement) return;
   vistaElement.classList.remove('d-none');
+
+  // En Creación de cuadros y series, el acordeón siempre inicia colapsado
+  // cada vez que el usuario entra desde el menú principal.
+  if(view === 'tables') {
+    // Al entrar desde el menú principal se muestra siempre el constructor de cuadros.
+    // La pantalla de consulta SQL solo se activa desde Nuevo > Crear nueva consulta.
+    if (typeof window.ts_mostrarModoCuadros === 'function') {
+      window.ts_mostrarModoCuadros(false);
+    } else if (typeof ts_mostrarModoCuadros === 'function') {
+      ts_mostrarModoCuadros(false);
+    }
+
+    const accordion = vistaElement.querySelector('#configurationAccordion');
+    if(accordion) {
+      accordion.querySelectorAll('.accordion-collapse').forEach(panel => {
+        const instance = window.bootstrap?.Collapse?.getInstance(panel);
+        if(instance) instance.hide();
+        panel.classList.remove('show');
+      });
+      accordion.querySelectorAll('.accordion-button').forEach(button => {
+        button.classList.add('collapsed');
+        button.setAttribute('aria-expanded', 'false');
+      });
+    }
+  }
+
   const titleMap={
     home:'Inicio',
     upload:'Carga de archivos',
     tables:'Creación de cuadros y series',
-    'panel-web':'Panel Web - Carga y Administración',
+    'panel-web':'Carga de archivos',
     publish:'Publicación de cuadros',
     editor:'Editor de páginas web',
     reports:'Consulta y generación de reportes',
