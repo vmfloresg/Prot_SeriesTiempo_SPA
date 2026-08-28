@@ -1654,15 +1654,18 @@
 /* =========================================================
    NUEVA CONSULTA SQL - Creación de cuadros y series
    ========================================================= */
-#tables .ts-query-workspace {
+#tables .ts-query-workspace,
+#sql-create .ts-query-workspace {
   padding: 0.25rem 0 0.5rem;
 }
 
-#tables .ts-query-workspace .card {
+#tables .ts-query-workspace .card,
+#sql-create .ts-query-workspace .card {
   border-radius: 0.75rem;
 }
 
-#tables .ts-query-step {
+#tables .ts-query-step,
+#sql-create .ts-query-step {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1676,7 +1679,8 @@
   font-size: 0.875rem;
 }
 
-#tables .ts-query-editor {
+#tables .ts-query-editor,
+#sql-create .ts-query-editor {
   min-height: 320px;
   resize: vertical;
   line-height: 1.55;
@@ -1684,7 +1688,8 @@
   background: #fff;
 }
 
-#tables .ts-query-editor:disabled {
+#tables .ts-query-editor:disabled,
+#sql-create .ts-query-editor:disabled {
   background: var(--bs-tertiary-bg);
   cursor: not-allowed;
 }
@@ -1753,4 +1758,112 @@
 #tsCrudRegistrosModal .ts-crud-row-disabled:not(.ts-crud-row-selected) {
     background-color: var(--bs-tertiary-bg);
     color: var(--bs-secondary-color);
+}
+
+
+/* Consultas SQL - Actualizar */
+#sql-update .sql-update-row { cursor:pointer; transition:background-color .15s ease, box-shadow .15s ease; }
+#sql-update .sql-update-row:hover { background-color:var(--bs-tertiary-bg); }
+#sql-update .sql-update-row:focus-visible { outline:2px solid var(--bs-primary); outline-offset:-2px; }
+#sql-update .sql-update-selected,
+#sql-update .sql-update-selected:hover { background-color:var(--bs-primary-bg-subtle); box-shadow:inset 4px 0 0 var(--bs-primary); }
+#sql-update .sql-update-selected td { border-color:var(--bs-primary-border-subtle); }
+#sql-update .sql-update-disabled:not(.sql-update-selected) { background-color:var(--bs-tertiary-bg); color:var(--bs-secondary-color); }
+
+/* =========================================================
+   Editor seguro de Series de datos
+   ========================================================= */
+#tsDataEditorModal .ts-data-editor-card {
+    border: 1px solid var(--bs-border-color);
+    border-radius: .85rem;
+    padding: 1rem;
+    background: var(--bs-body-bg);
+}
+
+#tsDataEditorModal .ts-data-editor-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    padding: .65rem;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .65rem;
+    background: var(--bs-body-bg);
+    box-shadow: 0 .2rem .7rem rgba(0,0,0,.05);
+}
+
+#tsDataEditorModal .ts-data-editor-table-wrap {
+    max-height: 520px;
+    border: 1px solid var(--bs-border-color);
+    border-radius: .65rem;
+}
+
+#tsDataEditorModal .ts-data-editor-table {
+    min-width: 760px;
+}
+
+#tsDataEditorModal .ts-data-editor-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: var(--bs-tertiary-bg);
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+#tsDataEditorModal .ts-data-concept-col { min-width: 235px; }
+#tsDataEditorModal .ts-data-period-col { min-width: 150px; }
+#tsDataEditorModal .ts-data-actions-col { min-width: 115px; }
+
+#tsDataEditorModal .ts-data-series-row td {
+    background: var(--bs-secondary-bg);
+    border-top-width: 2px;
+}
+
+#tsDataEditorModal .ts-data-cell {
+    min-width: 150px;
+    background: var(--bs-body-bg);
+}
+
+#tsDataEditorModal .ts-data-cell-input {
+    min-width: 90px;
+}
+
+#tsDataEditorModal .ts-data-cell-input.is-empty {
+    background-image: repeating-linear-gradient(135deg, transparent, transparent 5px, rgba(0,0,0,.025) 5px, rgba(0,0,0,.025) 10px);
+}
+
+#tsDataEditorModal .ts-data-cell-input:focus {
+    position: relative;
+    z-index: 2;
+}
+
+#tsDataEditorModal .ts-data-col-delete {
+    opacity: .55;
+    text-decoration: none;
+}
+
+#tsDataEditorModal .ts-data-period-col:hover .ts-data-col-delete,
+#tsDataEditorModal .ts-data-col-delete:focus {
+    opacity: 1;
+}
+
+#tsDataEditorModal #tsDataPendingBadge {
+    font-weight: 600;
+    padding: .5rem .65rem;
+}
+
+/* Modal de edición segura de Series de datos */
+#tsDataEditorModal .modal-dialog{max-width:min(96vw,1500px);}
+#tsDataEditorModal .modal-body{background:var(--bs-tertiary-bg);}
+#tsDataEditorModal #tsDataEditor{background:var(--bs-body-bg);border:1px solid var(--bs-border-color);border-radius:.85rem;padding:1rem;}
+#tsDataEditorModal .ts-data-editor-table-wrap{max-height:58vh;}
+#tsDataEditorModal .modal-footer{gap:.75rem;}
+@media (max-width:767.98px){#tsDataEditorModal .modal-footer{align-items:stretch!important;flex-direction:column;}#tsDataEditorModal .modal-footer>div:last-child{width:100%;}#tsDataEditorModal .modal-footer>div:last-child .btn{flex:1;}}
+
+/* Alta segura de una AFORE dentro del editor modal */
+#tsDataEditorModal #tsDataAddAforePanel {
+    border-style: dashed !important;
+}
+#tsDataEditorModal #tsDataAddAforePanel .form-label {
+    color: var(--bs-body-color);
 }

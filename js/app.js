@@ -8,7 +8,8 @@ let usuarios = [
 
 const modulosSistema = [
   { id: 'home', nombre: 'Inicio', descripcion: 'Página de inicio del sistema' },
-  { id: 'tables', nombre: 'Creación de cuadros y series', descripcion: 'Crear y gestionar cuadros y series de tiempo' },
+  { id: 'tables', nombre: 'Cuadros y Series', descripcion: 'Crear y gestionar cuadros y series de tiempo' },
+  { id: 'sql-create', nombre: 'Consultas SQL', descripcion: 'Crear y actualizar consultas SQL' },
   { id: 'panel-web', nombre: 'Carga de archivos', descripcion: 'Carga de archivos, editor y administración integrados' },
   { id: 'publish', nombre: 'Publicación de cuadros', descripcion: 'Publicar cuadros para visualización' },
   { id: 'editor', nombre: 'Editor de páginas web', descripcion: 'Editor para crear y modificar páginas' },
@@ -592,12 +593,51 @@ function closeSidebar(){
   }
 }
 
+
+function toggleCuadrosSeriesSubmenu(event){
+  event?.preventDefault();
+  event?.stopPropagation();
+  const menu=document.getElementById('cuadrosSeriesSubmenu');
+  const btn=document.getElementById('cuadrosSeriesMenuBtn');
+  if(!menu || !btn) return;
+  const abrir=menu.classList.contains('d-none');
+  menu.classList.toggle('d-none', !abrir);
+  btn.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+  btn.classList.toggle('submenu-open', abrir);
+}
+
+function toggleConsultasSqlSubmenu(event){
+  event?.preventDefault();
+  event?.stopPropagation();
+  const menu=document.getElementById('consultasSqlSubmenu');
+  const btn=document.getElementById('consultasSqlMenuBtn');
+  if(!menu || !btn) return;
+  const abrir=menu.classList.contains('d-none');
+  menu.classList.toggle('d-none', !abrir);
+  btn.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+  btn.classList.toggle('submenu-open', abrir);
+}
+
 document.querySelectorAll('[data-view]').forEach(a=>a.addEventListener('click',e=>{
   e.preventDefault();
   const target=a.getAttribute('data-view');
   showView(target);
   document.querySelectorAll('.sidebar-nav .nav-link').forEach(l=>l.classList.remove('active'));
   a.classList.add('active');
+  if(a.getAttribute('data-submenu') === 'cuadros-series'){
+    const submenu=document.getElementById('cuadrosSeriesSubmenu');
+    const btn=document.getElementById('cuadrosSeriesMenuBtn');
+    submenu?.classList.remove('d-none');
+    btn?.setAttribute('aria-expanded','true');
+    btn?.classList.add('submenu-open');
+  }
+  if(a.getAttribute('data-submenu') === 'consultas-sql'){
+    const submenu=document.getElementById('consultasSqlSubmenu');
+    const btn=document.getElementById('consultasSqlMenuBtn');
+    submenu?.classList.remove('d-none');
+    btn?.setAttribute('aria-expanded','true');
+    btn?.classList.add('submenu-open');
+  }
   if(window.innerWidth<992) closeSidebar();
 }));
 
@@ -633,10 +673,33 @@ function showView(view){
     }
   }
 
+  if(view === 'tables-update') {
+    if (typeof window.ts_crudPrepararPaginaActualizacion === 'function') {
+      window.ts_crudPrepararPaginaActualizacion();
+    } else if (typeof ts_crudPrepararPaginaActualizacion === 'function') {
+      ts_crudPrepararPaginaActualizacion();
+    }
+  }
+
+  if(view === 'sql-create') {
+    if (typeof window.ts_sqlRestablecerEstadoConexion === 'function') {
+      window.ts_sqlRestablecerEstadoConexion(false);
+    } else if (typeof ts_sqlRestablecerEstadoConexion === 'function') {
+      ts_sqlRestablecerEstadoConexion(false);
+    }
+  }
+
+  if(view === 'sql-update') {
+    window.renderConsultasSqlPage?.();
+  }
+
   const titleMap={
     home:'Inicio',
     upload:'Carga de archivos',
-    tables:'Creación de cuadros y series',
+    tables:'Cuadros y Series - Crear',
+    'tables-update':'Cuadros y Series - Actualizar',
+    'sql-create':'Consultas SQL - Crear Consulta',
+    'sql-update':'Consultas SQL - Actualizar consulta',
     'panel-web':'Carga de archivos',
     publish:'Publicación de cuadros',
     editor:'Editor de páginas web',

@@ -7,26 +7,8 @@
 <small class="text-muted">Alta, consulta, edición y eliminación de cuadros con estructura jerárquica de series.</small>
 </div>
 <div class="d-flex flex-wrap align-items-center gap-2">
-<div class="dropdown">
-<button aria-expanded="false" class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown" type="button">
+<button class="btn btn-outline-primary btn-sm" id="tsNuevoBtn" onclick="ts_mostrarModoCuadros(true)" type="button">
 <i class="bi bi-file-earmark-plus me-1"></i> Nuevo
-          </button>
-<ul class="dropdown-menu dropdown-menu-end shadow-sm">
-<li>
-<button class="dropdown-item" onclick="ts_mostrarModoCuadros(true)" type="button">
-<i class="bi bi-table me-2"></i> Creación de cuadros y series
-              </button>
-</li>
-<li>
-<button class="dropdown-item" onclick="ts_mostrarModoConsulta()" type="button">
-<i class="bi bi-database-add me-2"></i> Crear nueva consulta
-              </button>
-</li>
-</ul>
-</div>
-<button class="btn btn-outline-secondary btn-sm" id="tsCrudActualizarBtn" onclick="ts_crudAbrirRegistros()" type="button">
-<i class="bi bi-arrow-repeat me-1"></i> Actualizar
-          <span class="badge text-bg-secondary ms-1" id="tsCrudContador">0</span>
 </button>
 <button class="btn btn-primary btn-sm" id="tsCrudGuardarBtn" onclick="ts_crudGuardar()" type="button">
 <i class="bi bi-save me-1"></i> Guardar
@@ -309,6 +291,7 @@
                                             No existen series configuradas.
 
                                         </div>
+</div></div>
 </div>
 </div>
 </div>
@@ -342,6 +325,7 @@
 <!-- ACCIONES DE PREVISUALIZACIÓN -->
 <!-- ================================================= -->
 <div class="preview-actions">
+<button type="button" class="btn btn-outline-secondary" onclick="ts_editorDatosIniciar()"><i class="bi bi-table me-1"></i>Editar series de datos</button>
 <!-- VISTA COMPLETA -->
 <button class="btn btn-outline-primary" onclick="ts_vistaCompleta()" type="button">
 <i class="bi bi-arrows-fullscreen"></i>
@@ -484,3 +468,65 @@
 </div>
 </div>
 </div>
+
+<!-- Modal: editor seguro de Series de datos -->
+<div class="modal fade" id="tsDataEditorModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title mb-1"><i class="bi bi-grid-3x3-gap me-2"></i>Edición segura de Series de datos</h5>
+          <div class="small text-muted">Modifique AFORE, columnas y valores sobre una copia temporal. Los cambios se aplican únicamente al guardar.</div>
+        </div>
+        <button type="button" class="btn-close" aria-label="Cerrar" onclick="ts_editorDatosCancelar()"></button>
+      </div>
+      <div class="modal-body">
+        <div id="tsDataEditor">
+          <div class="ts-data-editor-toolbar d-flex flex-wrap align-items-center gap-2 mb-3">
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="ts_editorDatosMostrarAgregarAfore()"><i class="bi bi-person-plus me-1"></i>Agregar AFORE</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="ts_editorDatosAgregarColumna()"><i class="bi bi-layout-three-columns me-1"></i>Agregar columna</button>
+            <button type="button" id="tsDataUndoBtn" class="btn btn-sm btn-outline-secondary" onclick="ts_editorDatosDeshacer()"><i class="bi bi-arrow-counterclockwise me-1"></i>Deshacer</button>
+            <button type="button" id="tsDataRedoBtn" class="btn btn-sm btn-outline-secondary" onclick="ts_editorDatosRehacer()"><i class="bi bi-arrow-clockwise me-1"></i>Rehacer</button>
+            <span class="badge text-bg-warning-subtle text-warning-emphasis ms-lg-auto" id="tsDataPendingBadge">0 cambios pendientes</span>
+          </div>
+          <div id="tsDataAddAforePanel" class="card border-primary-subtle bg-body-tertiary mb-3 d-none">
+            <div class="card-body py-3">
+              <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                <div>
+                  <div class="fw-semibold"><i class="bi bi-diagram-3 me-1"></i>Agregar AFORE al árbol jerárquico</div>
+                  <div class="small text-muted">Seleccione la serie destino y después elija una AFORE del catálogo. Sus valores se crearán vacíos para evitar datos ficticios.</div>
+                </div>
+                <button type="button" class="btn-close" aria-label="Cerrar" onclick="ts_editorDatosOcultarAgregarAfore()"></button>
+              </div>
+              <div class="row g-2 align-items-end">
+                <div class="col-md-5">
+                  <label for="tsDataAddAforeSerie" class="form-label small fw-semibold mb-1">Serie destino</label>
+                  <select id="tsDataAddAforeSerie" class="form-select form-select-sm" onchange="ts_editorDatosActualizarAforesDisponibles()"></select>
+                </div>
+                <div class="col-md-5">
+                  <label for="tsDataAddAforeNombre" class="form-label small fw-semibold mb-1">Nombre de la AFORE</label>
+                  <select id="tsDataAddAforeNombre" class="form-select form-select-sm">
+                    <option value="">Seleccione una AFORE...</option>
+                  </select>
+                </div>
+                <div class="col-md-2 d-grid">
+                  <button type="button" class="btn btn-sm btn-primary" onclick="ts_editorDatosAgregarAfore()"><i class="bi bi-plus-circle me-1"></i>Agregar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="alert alert-light border py-2 small mb-3"><i class="bi bi-shield-check me-1"></i>Los cambios son temporales hasta pulsar <strong>Guardar cambios</strong>. Una celda vacía significa “sin información”; el valor <strong>0</strong> se conserva como cero.</div>
+          <div class="table-responsive ts-data-editor-table-wrap"><table class="table table-sm table-bordered align-middle mb-0 ts-data-editor-table"><thead id="tsDataEditorHead"></thead><tbody id="tsDataEditorBody"></tbody></table></div>
+        </div>
+      </div>
+      <div class="modal-footer d-flex justify-content-between align-items-center">
+        <div class="small text-muted"><i class="bi bi-info-circle me-1"></i>Use Deshacer antes de guardar si necesita recuperar un cambio.</div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-secondary" onclick="ts_editorDatosCancelar()">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="ts_editorDatosGuardar()"><i class="bi bi-check2-circle me-1"></i>Guardar cambios</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

@@ -138,6 +138,62 @@ function initPanelWeb() {
     let campoSeleccionadoLista = [];
     let consultaAEditarId = null;
 
+    const panelSqlFechaAhora = () => {
+        const d = new Date();
+        return d.toLocaleString('es-MX', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+    };
+
+    const fechasEjemploConsultas = ['26/08/2026, 10:30','26/08/2026, 09:15','25/08/2026, 16:40','25/08/2026, 12:10','24/08/2026, 17:25','23/08/2026, 11:50','22/08/2026, 14:35','21/08/2026, 10:05','20/08/2026, 16:20','19/08/2026, 13:45'];
+    consultas.forEach((consulta, index) => {
+        if (!consulta.fechaUltimaActualizacion) consulta.fechaUltimaActualizacion = fechasEjemploConsultas[index] || '18/08/2026, 09:00';
+    });
+
+    window.PanelWebConsultas = {
+        listar() {
+            return consultas.map(consulta => ({ ...consulta, campos:[...(consulta.campos || [])] }));
+        },
+        editar(id) {
+            abrirModalEditarConsulta(Number(id));
+        },
+        cambiarEstado(id) {
+            const consulta = consultas.find(c => c.id === Number(id));
+            if (!consulta) return null;
+            consulta.habilitada = consulta.habilitada === false;
+            consulta.fechaUltimaActualizacion = panelSqlFechaAhora();
+            renderConsultas();
+            actualizarResumen();
+            window.renderConsultasSqlPage?.();
+            return { ...consulta };
+        },
+        agregarDesdeCreador(registro) {
+            const nombre = (registro?.nombre || 'Consulta SQL').trim();
+            const existente = consultas.find(c => c.nombre === nombre);
+            const payload = {
+                nombre,
+                descripcion: existente?.descripcion || 'Consulta creada desde el módulo Consultas SQL',
+                sql: registro?.consulta || existente?.sql || '',
+                servidor: registro?.servidor || existente?.servidor || '',
+                baseDatos: registro?.baseDatos || existente?.baseDatos || '',
+                usuario: registro?.usuario || existente?.usuario || '',
+                contrasena: existente?.contrasena || '',
+                puerto: registro?.puerto || existente?.puerto || '',
+                tabla: existente?.tabla || '',
+                campos: [...(existente?.campos || [])],
+                habilitada: true,
+                fechaUltimaActualizacion: panelSqlFechaAhora()
+            };
+            if (existente) {
+                Object.assign(existente, payload);
+            } else {
+                const maxId = consultas.reduce((max,c) => Math.max(max, Number(c.id) || 0), 0);
+                consultas.push({ id:maxId+1, ...payload });
+            }
+            renderConsultas();
+            actualizarResumen();
+            window.renderConsultasSqlPage?.();
+        }
+    };
+
 
     //Para ña fecha de la consulta
 
@@ -331,7 +387,7 @@ function initPanelWeb() {
                     <small class="text-muted">${q.descripcion}</small>
                 </label>
                 
-                <button type="button" class="btn btn-sm btn-outline-primary btn-editar-consulta" data-id="${q.id}">Editar</button>
+                
             `;
             listaConsultasDashboard.appendChild(div);
         });
@@ -1067,7 +1123,8 @@ WHERE (anio = '${anioIni}' AND mes >= '${mesIni}')
             tabla: tabla ? tabla.nombre : "",
             campos: [...campoSeleccionadoLista],
             diaHabil,
-            habilitada: true
+            habilitada: true,
+            fechaUltimaActualizacion: panelSqlFechaAhora()
         };
         if (consultaAEditarId !== null) {
             const idx = consultas.findIndex((c) => c.id === consultaAEditarId);
@@ -1078,6 +1135,7 @@ WHERE (anio = '${anioIni}' AND mes >= '${mesIni}')
         consultaAEditarId = null;
         renderConsultas();
         actualizarResumen();
+        window.renderConsultasSqlPage?.();
         bootstrap.Modal.getOrCreateInstance(document.getElementById("modalNuevaConsulta")).hide();
     });
 
@@ -1102,12 +1160,14 @@ WHERE (anio = '${anioIni}' AND mes >= '${mesIni}')
                     puerto: sqlPuerto.value.trim() || consultas[idx].puerto,
                     tabla: tabla ? tabla.nombre : consultas[idx].tabla,
                     campos: campoSeleccionadoLista.length ? [...campoSeleccionadoLista] : consultas[idx].campos,
-                    diaHabil
+                    diaHabil,
+                    fechaUltimaActualizacion: panelSqlFechaAhora()
                 };
             }
         });
         renderConsultas();
         actualizarResumen();
+        window.renderConsultasSqlPage?.();
     });
 
     btnSeleccionarTodos?.addEventListener("click", () => {

@@ -1158,6 +1158,387 @@ let ts_siguienteSerieId = 1;
 
 
 /* =========================================================
+   EDITOR SEGURO DE SERIES DE DATOS
+   Los cambios se realizan sobre un borrador y sólo pasan al
+   cuadro al pulsar "Guardar cambios".
+   ========================================================= */
+
+let ts_periodosDatos = [
+    { id: "p1", label: "JUNIO 2025" },
+    { id: "p2", label: "MAYO 2026" },
+    { id: "p3", label: "JUNIO 2026" }
+];
+let ts_valoresDatos = {};
+let ts_editorDatosActivo = false;
+let ts_editorDatosDraft = null;
+let ts_editorDatosBase = null;
+let ts_editorDatosUndo = [];
+let ts_editorDatosRedo = [];
+
+function ts_datosClave(serieId, afore, periodoId) {
+    return `${serieId}::${afore}::${periodoId}`;
+}
+
+function ts_datosClonar(valor) {
+    return JSON.parse(JSON.stringify(valor));
+}
+
+function ts_datosValorInicial(serieId, afore, periodoId, series = ts_seriesDatos, periodos = ts_periodosDatos) {
+    const serie = series.find(s => Number(s.id) === Number(serieId));
+    if (!serie) return null;
+    const ai = Math.max(0, serie.afores.indexOf(afore));
+    const pi = Math.max(0, periodos.findIndex(p => p.id === periodoId));
+    const base = ts_obtenerValorEjemplo(Number(serieId), ai);
+    const factores = [1, 1.035, 1.041];
+    const factor = factores[pi] ?? (1 + pi * 0.025);
+    return Number((base * factor).toFixed(2));
+}
+
+function ts_datosAsegurarValores(series = ts_seriesDatos, periodos = ts_periodosDatos, valores = ts_valoresDatos) {
+    series.forEach(serie => {
+        (serie.afores || []).forEach(afore => {
+            periodos.forEach(periodo => {
+                const key = ts_datosClave(serie.id, afore, periodo.id);
+                if (!(key in valores)) valores[key] = ts_datosValorInicial(serie.id, afore, periodo.id, series, periodos);
+            });
+        });
+    });
+    return valores;
+}
+
+function ts_editorDatosSnapshot() {
+    return ts_datosClonar(ts_editorDatosDraft);
+}
+
+function ts_editorDatosRegistrarCambio() {
+    if (!ts_editorDatosActivo) return;
+    ts_editorDatosUndo.push(ts_editorDatosSnapshot());
+    if (ts_editorDatosUndo.length > 50) ts_editorDatosUndo.shift();
+    ts_editorDatosRedo = [];
+}
+
+function ts_editorDatosIniciar() {
+    if (!ts_seriesDatos.length) {
+        ts_mostrarMensaje("Agregue al menos una serie antes de editar sus datos.", "warning");
+        return;
+    }
+    ts_datosAsegurarValores();
+    ts_editorDatosActivo = true;
+    ts_editorDatosDraft = {
+        series: ts_datosClonar(ts_seriesDatos),
+        periodos: ts_datosClonar(ts_periodosDatos),
+        valores: ts_datosClonar(ts_valoresDatos)
+    };
+    ts_editorDatosBase = ts_datosClonar(ts_editorDatosDraft);
+    ts_editorDatosUndo = [];
+    ts_editorDatosRedo = [];
+    ts_editorDatosRender();
+
+    const modalEl = document.getElementById("tsDataEditorModal");
+    if (modalEl && window.bootstrap?.Modal) {
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    }
+}
+
+function ts_editorDatosCancelar() {
+    if (!ts_editorDatosActivo) return;
+    const cambios = ts_editorDatosContarCambios();
+    if (cambios.total && !confirm(`Hay ${cambios.total} cambio(s) sin guardar. ¿Desea descartarlos?`)) return;
+    ts_editorDatosCerrar();
+    ts_mostrarMensaje("Los cambios de datos fueron cancelados.", "info");
+}
+
+function ts_editorDatosCerrar() {
+    ts_editorDatosActivo = false;
+    ts_editorDatosDraft = null;
+    ts_editorDatosBase = null;
+    ts_editorDatosUndo = [];
+    ts_editorDatosRedo = [];
+
+    const modalEl = document.getElementById("tsDataEditorModal");
+    if (modalEl && window.bootstrap?.Modal) {
+        bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+    }
+}
+
+function ts_editorDatosDeshacer() {
+    if (!ts_editorDatosUndo.length) return;
+    ts_editorDatosRedo.push(ts_editorDatosSnapshot());
+    ts_editorDatosDraft = ts_editorDatosUndo.pop();
+    ts_editorDatosRender();
+}
+
+function ts_editorDatosRehacer() {
+    if (!ts_editorDatosRedo.length) return;
+    ts_editorDatosUndo.push(ts_editorDatosSnapshot());
+    ts_editorDatosDraft = ts_editorDatosRedo.pop();
+    ts_editorDatosRender();
+}
+
+function ts_editorDatosQuitarAfore(serieId, afore) {
+    if (!ts_editorDatosActivo) return;
+    const serie = ts_editorDatosDraft.series.find(s => Number(s.id) === Number(serieId));
+    if (!serie) return;
+    if (!confirm(`¿Quitar “${afore}” de la serie “${serie.title}”?\n\nSus valores dejarán de formar parte del cuadro. Puede deshacer este cambio antes de guardar.`)) return;
+    ts_editorDatosRegistrarCambio();
+    serie.afores = serie.afores.filter(a => a !== afore);
+    ts_editorDatosDraft.periodos.forEach(p => delete ts_editorDatosDraft.valores[ts_datosClave(serieId, afore, p.id)]);
+    ts_editorDatosRender();
+}
+
+function ts_editorDatosCatalogoAfores() {
+    const desdeSelectorPrincipal = Array.from(document.querySelectorAll(".afore-check"))
+        .map(c => String(c.value || "").trim())
+        .filter(Boolean);
+
+    const catalogoBase = desdeSelectorPrincipal.length ? desdeSelectorPrincipal : [
+        "Azteca", "Banamex", "Coppel", "Inbursa", "Invercap",
+        "PensionISSSTE", "Principal", "Profuturo", "SURA", "XXI Banorte"
+    ];
+
+    return [...new Set(catalogoBase)];
+}
+
+function ts_editorDatosActualizarAforesDisponibles() {
+    if (!ts_editorDatosDraft) return;
+    const serieSelect = document.getElementById("tsDataAddAforeSerie");
+    const aforeSelect = document.getElementById("tsDataAddAforeNombre");
+    if (!serieSelect || !aforeSelect) return;
+
+    const serie = ts_editorDatosDraft.series.find(s => Number(s.id) === Number(serieSelect.value));
+    const usadas = new Set((serie?.afores || []).map(a => String(a).trim().toLowerCase()));
+    const disponibles = ts_editorDatosCatalogoAfores().filter(a => !usadas.has(a.toLowerCase()));
+
+    aforeSelect.innerHTML = `<option value="">Seleccione una AFORE...</option>${disponibles.map(a =>
+        `<option value="${ts_escapeHtml(a)}">${ts_escapeHtml(a)}</option>`
+    ).join("")}`;
+
+    if (!disponibles.length) {
+        aforeSelect.innerHTML = '<option value="">No hay AFORE disponibles para esta serie</option>';
+        aforeSelect.disabled = true;
+    } else {
+        aforeSelect.disabled = false;
+    }
+}
+
+function ts_editorDatosMostrarAgregarAfore() {
+    if (!ts_editorDatosActivo || !ts_editorDatosDraft) return;
+    const panel = document.getElementById("tsDataAddAforePanel");
+    const select = document.getElementById("tsDataAddAforeSerie");
+    const input = document.getElementById("tsDataAddAforeNombre");
+    if (!panel || !select || !input) return;
+
+    const opciones = [];
+    const agregarOpcion = (serie) => {
+        const prefijo = "— ".repeat(Math.max(0, Number(serie.indent || 0)));
+        opciones.push(`<option value="${serie.id}">${ts_escapeHtml(prefijo + serie.title)}</option>`);
+        ts_editorDatosDraft.series
+            .filter(s => Number(s.parentId) === Number(serie.id))
+            .forEach(agregarOpcion);
+    };
+    ts_editorDatosDraft.series.filter(s => s.parentId === null).forEach(agregarOpcion);
+    select.innerHTML = opciones.join("");
+    panel.classList.remove("d-none");
+    ts_editorDatosActualizarAforesDisponibles();
+    setTimeout(() => input.focus(), 50);
+}
+
+function ts_editorDatosOcultarAgregarAfore() {
+    document.getElementById("tsDataAddAforePanel")?.classList.add("d-none");
+    const input = document.getElementById("tsDataAddAforeNombre");
+    if (input) input.value = "";
+}
+
+function ts_editorDatosAgregarAfore() {
+    if (!ts_editorDatosActivo || !ts_editorDatosDraft) return;
+    const select = document.getElementById("tsDataAddAforeSerie");
+    const input = document.getElementById("tsDataAddAforeNombre");
+    if (!select || !input) return;
+
+    const serieId = Number(select.value);
+    const nombre = String(input.value || "").trim();
+    if (!nombre) {
+        ts_mostrarMensaje("Seleccione la AFORE que desea agregar.", "warning");
+        input.focus();
+        return;
+    }
+
+    const serie = ts_editorDatosDraft.series.find(s => Number(s.id) === serieId);
+    if (!serie) return;
+    serie.afores = Array.isArray(serie.afores) ? serie.afores : [];
+
+    const existe = serie.afores.some(a => String(a).trim().toLowerCase() === nombre.toLowerCase());
+    if (existe) {
+        ts_mostrarMensaje(`La AFORE “${nombre}” ya existe dentro de la serie “${serie.title}”.`, "warning");
+        input.focus();
+        return;
+    }
+
+    ts_editorDatosRegistrarCambio();
+    serie.afores.push(nombre);
+    ts_editorDatosDraft.periodos.forEach(p => {
+        ts_editorDatosDraft.valores[ts_datosClave(serie.id, nombre, p.id)] = null;
+    });
+
+    ts_editorDatosOcultarAgregarAfore();
+    ts_editorDatosRender();
+    ts_mostrarMensaje(`AFORE “${nombre}” agregada a “${serie.title}”. Guarde los cambios para aplicarla al cuadro.`, "success");
+}
+
+function ts_editorDatosEliminarColumna(periodoId) {
+    if (!ts_editorDatosActivo) return;
+    if (ts_editorDatosDraft.periodos.length <= 1) {
+        ts_mostrarMensaje("Debe conservar al menos una columna de datos.", "warning");
+        return;
+    }
+    const periodo = ts_editorDatosDraft.periodos.find(p => p.id === periodoId);
+    if (!periodo) return;
+    let valores = 0;
+    ts_editorDatosDraft.series.forEach(s => valores += (s.afores || []).length);
+    if (!confirm(`¿Eliminar la columna “${periodo.label}”?\n\nSe retirarán ${valores} valor(es) asociados. Puede deshacer el cambio antes de guardar.`)) return;
+    ts_editorDatosRegistrarCambio();
+    ts_editorDatosDraft.periodos = ts_editorDatosDraft.periodos.filter(p => p.id !== periodoId);
+    Object.keys(ts_editorDatosDraft.valores).forEach(k => {
+        if (k.endsWith(`::${periodoId}`)) delete ts_editorDatosDraft.valores[k];
+    });
+    ts_editorDatosRender();
+}
+
+function ts_editorDatosAgregarColumna() {
+    if (!ts_editorDatosActivo) return;
+    const label = prompt("Nombre de la nueva columna o periodo:", "JULIO 2026");
+    if (!label || !label.trim()) return;
+    ts_editorDatosRegistrarCambio();
+    const id = `p${Date.now()}`;
+    ts_editorDatosDraft.periodos.push({ id, label: label.trim().toUpperCase() });
+    ts_editorDatosDraft.series.forEach(s => (s.afores || []).forEach(a => {
+        ts_editorDatosDraft.valores[ts_datosClave(s.id, a, id)] = null;
+    }));
+    ts_editorDatosRender();
+}
+
+function ts_editorDatosCambiarCelda(serieId, afore, periodoId, input) {
+    if (!ts_editorDatosActivo) return;
+    const key = ts_datosClave(serieId, afore, periodoId);
+    const anterior = ts_editorDatosDraft.valores[key];
+    const texto = String(input.value ?? "").trim();
+    let nuevo = null;
+    if (texto !== "") {
+        const normalizado = texto.replace(/,/g, "");
+        nuevo = Number.isFinite(Number(normalizado)) ? Number(normalizado) : texto;
+    }
+    if (String(anterior ?? "") === String(nuevo ?? "")) return;
+    ts_editorDatosRegistrarCambio();
+    ts_editorDatosDraft.valores[key] = nuevo;
+    ts_editorDatosRender();
+}
+
+function ts_editorDatosLimpiarCelda(serieId, afore, periodoId) {
+    if (!ts_editorDatosActivo) return;
+    const key = ts_datosClave(serieId, afore, periodoId);
+    if (ts_editorDatosDraft.valores[key] === null || ts_editorDatosDraft.valores[key] === "") return;
+    ts_editorDatosRegistrarCambio();
+    ts_editorDatosDraft.valores[key] = null;
+    ts_editorDatosRender();
+}
+
+function ts_editorDatosContarCambios() {
+    if (!ts_editorDatosBase || !ts_editorDatosDraft) return { total: 0, afores: 0, aforesAgregadas: 0, columnas: 0, agregadas: 0, celdas: 0 };
+    const baseP = new Set(ts_editorDatosBase.periodos.map(p => p.id));
+    const draftP = new Set(ts_editorDatosDraft.periodos.map(p => p.id));
+    const columnas = [...baseP].filter(id => !draftP.has(id)).length;
+    const agregadas = [...draftP].filter(id => !baseP.has(id)).length;
+    let afores = 0;
+    let aforesAgregadas = 0;
+
+    ts_editorDatosBase.series.forEach(bs => {
+        const ds = ts_editorDatosDraft.series.find(s => Number(s.id) === Number(bs.id));
+        const actuales = new Set((ds?.afores || []).map(a => String(a).toLowerCase()));
+        afores += (bs.afores || []).filter(a => !actuales.has(String(a).toLowerCase())).length;
+    });
+    ts_editorDatosDraft.series.forEach(ds => {
+        const bs = ts_editorDatosBase.series.find(s => Number(s.id) === Number(ds.id));
+        const originales = new Set((bs?.afores || []).map(a => String(a).toLowerCase()));
+        aforesAgregadas += (ds.afores || []).filter(a => !originales.has(String(a).toLowerCase())).length;
+    });
+
+    const keys = new Set([...Object.keys(ts_editorDatosBase.valores), ...Object.keys(ts_editorDatosDraft.valores)]);
+    let celdas = 0;
+    keys.forEach(k => {
+        if (JSON.stringify(ts_editorDatosBase.valores[k] ?? null) !== JSON.stringify(ts_editorDatosDraft.valores[k] ?? null)) celdas++;
+    });
+    return { total: columnas + agregadas + afores + aforesAgregadas + celdas, afores, aforesAgregadas, columnas, agregadas, celdas };
+}
+
+function ts_editorDatosGuardar() {
+    if (!ts_editorDatosActivo) return;
+    const c = ts_editorDatosContarCambios();
+    if (!c.total) {
+        ts_editorDatosCerrar();
+        ts_mostrarMensaje("No había cambios de datos por guardar.", "info");
+        return;
+    }
+    const resumen = [
+        c.afores ? `${c.afores} AFORE(s) retirada(s) de series` : null,
+        c.aforesAgregadas ? `${c.aforesAgregadas} AFORE(s) agregada(s) a series` : null,
+        c.columnas ? `${c.columnas} columna(s) eliminada(s)` : null,
+        c.agregadas ? `${c.agregadas} columna(s) agregada(s)` : null,
+        c.celdas ? `${c.celdas} valor(es) modificado(s) o limpiado(s)` : null
+    ].filter(Boolean).join("\n• ");
+    if (!confirm(`Guardar modificaciones de Series de datos:\n\n• ${resumen}\n\nLos cambios quedarán aplicados al cuadro actual.`)) return;
+    ts_seriesDatos = ts_datosClonar(ts_editorDatosDraft.series);
+    ts_periodosDatos = ts_datosClonar(ts_editorDatosDraft.periodos);
+    ts_valoresDatos = ts_datosClonar(ts_editorDatosDraft.valores);
+    ts_editorDatosCerrar();
+    ts_renderizarSeriesConfiguradas();
+    ts_actualizarCatalogoSeriesPadre();
+    ts_actualizarVistaPreviaSeries();
+    ts_mostrarMensaje("Cambios de Series de datos guardados correctamente.", "success");
+}
+
+function ts_editorDatosRender() {
+    if (!ts_editorDatosActivo || !ts_editorDatosDraft) return;
+    const head = document.getElementById("tsDataEditorHead");
+    const body = document.getElementById("tsDataEditorBody");
+    if (!head || !body) return;
+    const d = ts_editorDatosDraft;
+    head.innerHTML = `<tr><th class="ts-data-concept-col">Serie / AFORE</th>${d.periodos.map(p => `
+        <th class="text-center ts-data-period-col">
+            <div class="d-flex align-items-center justify-content-center gap-1">
+                <span>${ts_escapeHtml(p.label)}</span>
+                <button type="button" class="btn btn-link btn-sm text-danger p-0 ts-data-col-delete" title="Eliminar columna" onclick="ts_editorDatosEliminarColumna('${p.id}')"><i class="bi bi-trash3"></i></button>
+            </div>
+        </th>`).join("")}<th class="text-center ts-data-actions-col">Acciones</th></tr>`;
+
+    let html = "";
+    const renderSerie = (serie) => {
+        html += `<tr class="ts-data-series-row"><td colspan="${d.periodos.length + 2}" style="padding-left:${serie.indent * 18 + 10}px"><i class="bi bi-diagram-3 me-2"></i><strong>${ts_escapeHtml(serie.title)}</strong><span class="badge text-bg-light ms-2">${(serie.afores || []).length} AFORE(s)</span></td></tr>`;
+        (serie.afores || []).forEach(afore => {
+            html += `<tr><td style="padding-left:${(serie.indent + 1) * 18 + 10}px"><span class="text-muted me-1">↳</span>${ts_escapeHtml(afore)}</td>`;
+            d.periodos.forEach(p => {
+                const key = ts_datosClave(serie.id, afore, p.id);
+                const value = d.valores[key];
+                const display = value === null || value === undefined ? "" : value;
+                html += `<td class="ts-data-cell"><div class="input-group input-group-sm"><input class="form-control text-end ts-data-cell-input ${display === "" ? "is-empty" : ""}" value="${ts_escapeHtml(String(display))}" aria-label="Valor ${ts_escapeHtml(afore)} ${ts_escapeHtml(p.label)}" onchange="ts_editorDatosCambiarCelda(${serie.id}, '${String(afore).replace(/'/g,"\\'")}', '${p.id}', this)"><button class="btn btn-outline-secondary" type="button" title="Limpiar valor" onclick="ts_editorDatosLimpiarCelda(${serie.id}, '${String(afore).replace(/'/g,"\\'")}', '${p.id}')"><i class="bi bi-x-lg"></i></button></div></td>`;
+            });
+            html += `<td class="text-center"><button type="button" class="btn btn-sm btn-outline-danger" onclick="ts_editorDatosQuitarAfore(${serie.id}, '${String(afore).replace(/'/g,"\\'")}')" title="Quitar esta AFORE de la serie"><i class="bi bi-trash3 me-1"></i>Quitar</button></td></tr>`;
+        });
+        d.series.filter(s => Number(s.parentId) === Number(serie.id)).forEach(renderSerie);
+    };
+    d.series.filter(s => s.parentId === null).forEach(renderSerie);
+    body.innerHTML = html || `<tr><td colspan="${d.periodos.length + 2}" class="text-center text-muted py-4">No hay datos para editar.</td></tr>`;
+
+    const c = ts_editorDatosContarCambios();
+    const badge = document.getElementById("tsDataPendingBadge");
+    if (badge) badge.textContent = `${c.total} cambio${c.total === 1 ? "" : "s"} pendiente${c.total === 1 ? "" : "s"}`;
+    const undo = document.getElementById("tsDataUndoBtn");
+    const redo = document.getElementById("tsDataRedoBtn");
+    if (undo) undo.disabled = !ts_editorDatosUndo.length;
+    if (redo) redo.disabled = !ts_editorDatosRedo.length;
+}
+
+
+/* =========================================================
    ACTUALIZAR SANGRIA
    ========================================================= */
 
@@ -1743,6 +2124,9 @@ function ts_renderizarNodoSerie(
 
 function ts_eliminarSerieDatos(id) {
 
+    const serieObjetivo = ts_seriesDatos.find(serie => serie.id === id);
+    if (!serieObjetivo) return;
+
     const hasChildren =
         ts_seriesDatos.some(
             serie =>
@@ -1762,11 +2146,16 @@ function ts_eliminarSerieDatos(id) {
     }
 
 
+    if (!confirm(`¿Quitar la serie “${serieObjetivo.title}”?\n\nEsta acción modificará la estructura del cuadro.`)) return;
+
     ts_seriesDatos =
         ts_seriesDatos.filter(
             serie =>
                 serie.id !== id
         );
+    Object.keys(ts_valoresDatos).forEach(key => {
+        if (key.startsWith(`${id}::`)) delete ts_valoresDatos[key];
+    });
 
 
     ts_renderizarSeriesConfiguradas();
@@ -1867,24 +2256,14 @@ function ts_actualizarVistaPreviaSeries() {
         "preview-series-data";
 
 
+    ts_datosAsegurarValores();
+
+    seriesContainer.style.setProperty("--ts-data-cols", String(ts_periodosDatos.length));
     seriesContainer.innerHTML = `
-
-        <div class="preview-series-header">
-
-            <div class="preview-concept">
-
-                CONCEPTO
-
-            </div>
-
-            <div>JUNIO 2025</div>
-
-            <div>MAYO 2026</div>
-
-            <div>JUNIO 2026</div>
-
+        <div class="preview-series-header" style="grid-template-columns:minmax(230px,1.7fr) repeat(${ts_periodosDatos.length}, minmax(100px,1fr));">
+            <div class="preview-concept">CONCEPTO</div>
+            ${ts_periodosDatos.map(periodo => `<div>${ts_escapeHtml(periodo.label)}</div>`).join("")}
         </div>
-
     `;
 
 
@@ -1948,24 +2327,13 @@ function ts_renderizarSeriePreview(
 
 
 
+    titleRow.style.gridTemplateColumns = `minmax(230px,1.7fr) repeat(${ts_periodosDatos.length}, minmax(100px,1fr))`;
     titleRow.innerHTML = `
-
         <div class="preview-concept" style="padding-left:${serie.indent * 24 + 8}px">
-
-            <span class="preview-checkbox">
-                □
-            </span>
-
+            <span class="preview-checkbox">□</span>
             ${ts_escapeHtml(serie.title)}
-
         </div>
-
-        <div></div>
-
-        <div></div>
-
-        <div></div>
-
+        ${ts_periodosDatos.map(() => `<div></div>`).join("")}
     `;
 
 
@@ -2007,39 +2375,17 @@ function ts_renderizarSeriePreview(
                 );
 
 
+            row.style.gridTemplateColumns = `minmax(230px,1.7fr) repeat(${ts_periodosDatos.length}, minmax(100px,1fr))`;
             row.innerHTML = `
-
                 <div class="preview-concept" style="padding-left:${(serie.indent + 1) * 24 + 8}px">
-
-                    <span class="preview-checkbox">
-                        □
-                    </span>
-
+                    <span class="preview-checkbox">□</span>
                     ${ts_escapeHtml(afore)}
-
                 </div>
-
-
-                <div>
-                    ${ts_formatearNumero(
-                baseValue
-            )}
-                </div>
-
-
-                <div>
-                    ${ts_formatearNumero(
-                baseValue * 1.035
-            )}
-                </div>
-
-
-                <div>
-                    ${ts_formatearNumero(
-                baseValue * 1.041
-            )}
-                </div>
-
+                ${ts_periodosDatos.map(periodo => {
+                    const key = ts_datosClave(serie.id, afore, periodo.id);
+                    const value = ts_valoresDatos[key];
+                    return `<div>${value === null || value === undefined || value === "" ? '<span class="text-muted">—</span>' : (typeof value === "number" ? ts_formatearNumero(value) : ts_escapeHtml(String(value)))}</div>`;
+                }).join("")}
             `;
 
 
@@ -2870,6 +3216,8 @@ function ts_crudRecolectarFormulario() {
         },
         configuracionSerie: ts_crudClonar(ts_configuracionSerie) || {},
         seriesDatos: ts_crudClonar(ts_seriesDatos) || [],
+        periodosDatos: ts_crudClonar(ts_periodosDatos) || [],
+        valoresDatos: ts_crudClonar(ts_valoresDatos) || {},
         siguienteSerieId: ts_siguienteSerieId,
         notas: document.getElementById("chartNotes")?.value || "",
         fuente: document.getElementById("chartSource")?.value || "",
@@ -2910,6 +3258,8 @@ function ts_crudValidar(registro) {
     return true;
 }
 
+let ts_crudOrigenActualizacionPagina = false;
+
 function ts_crudGuardar() {
     const registro = ts_crudRecolectarFormulario();
     if (!ts_crudValidar(registro)) return;
@@ -2928,13 +3278,34 @@ function ts_crudGuardar() {
         esEdicion ? `Cuadro ${registro.id} actualizado correctamente.` : `Cuadro ${registro.id} creado correctamente.`,
         "success"
     );
+
+    if (esEdicion && ts_crudOrigenActualizacionPagina) {
+        ts_crudOrigenActualizacionPagina = false;
+        const nuevo = document.getElementById("tsNuevoBtn");
+        if (nuevo) nuevo.classList.remove("d-none");
+
+        if (typeof showView === "function") showView("tables-update");
+        document.querySelectorAll(".sidebar-nav .nav-link").forEach(link => link.classList.remove("active"));
+        document.querySelector('[data-view="tables-update"]')?.classList.add("active");
+        ts_crudPrepararPaginaActualizacion();
+    }
 }
 
 function ts_crudNuevo() {
+    ts_crudOrigenActualizacionPagina = false;
+    const nuevoBtn = document.getElementById("tsNuevoBtn");
+    if (nuevoBtn) nuevoBtn.classList.remove("d-none");
     ts_crudIdActual = null;
     ts_series = [];
     ts_datos = [];
     ts_seriesDatos = [];
+    ts_periodosDatos = [
+        { id: "p1", label: "JUNIO 2025" },
+        { id: "p2", label: "MAYO 2026" },
+        { id: "p3", label: "JUNIO 2026" }
+    ];
+    ts_valoresDatos = {};
+    ts_editorDatosCerrar();
     ts_siguienteSerieId = 1;
     ts_configuracionSerie = {
         descripcion: "", decimales: 2, tipoCifra: "", periodicidad: "",
@@ -2997,6 +3368,14 @@ function ts_crudAplicarRegistro(registro) {
 
     ts_configuracionSerie = ts_crudClonar(c) || {};
     ts_seriesDatos = ts_crudClonar(registro.seriesDatos) || [];
+    ts_periodosDatos = ts_crudClonar(registro.periodosDatos) || [
+        { id: "p1", label: "JUNIO 2025" },
+        { id: "p2", label: "MAYO 2026" },
+        { id: "p3", label: "JUNIO 2026" }
+    ];
+    ts_valoresDatos = ts_crudClonar(registro.valoresDatos) || {};
+    ts_datosAsegurarValores();
+    ts_editorDatosCerrar();
     ts_siguienteSerieId = Number(registro.siguienteSerieId) ||
         (ts_seriesDatos.reduce((max, s) => Math.max(max, Number(s.id) || 0), 0) + 1);
     ts_series = ts_crudClonar(registro.seriesLegacy) || [];
@@ -3038,6 +3417,7 @@ function ts_crudEliminar(id) {
     ts_crudPersistirRegistros(registros.filter(r => r.id !== id));
     if (ts_crudIdActual === id) ts_crudNuevo();
     ts_crudRenderizarRegistros();
+    ts_crudRenderizarPaginaActualizacion();
     ts_mostrarMensaje(`Cuadro ${id} eliminado.`, "success");
 }
 
@@ -3120,14 +3500,16 @@ function ts_crudRenderizarRegistros() {
 function ts_crudSeleccionarRegistro(id) {
     ts_crudRegistroSeleccionado = id;
 
-    document.querySelectorAll("#tsCrudRegistrosBody .ts-crud-selectable-row").forEach(row => {
+    document.querySelectorAll("#tsCrudRegistrosBody .ts-crud-selectable-row, #tsCrudRegistrosPaginaBody .ts-crud-selectable-row").forEach(row => {
         const seleccionado = row.dataset.registroId === id;
         row.classList.toggle("ts-crud-row-selected", seleccionado);
         row.setAttribute("aria-selected", seleccionado ? "true" : "false");
     });
 
-    const actualizar = document.getElementById("tsCrudActualizarSeleccionadoBtn");
-    if (actualizar) actualizar.disabled = !id;
+    const modalBtn = document.getElementById("tsCrudActualizarSeleccionadoBtn");
+    const pageBtn = document.getElementById("tsCrudActualizarPaginaBtn");
+    if (modalBtn) modalBtn.disabled = !id;
+    if (pageBtn) pageBtn.disabled = !id;
 }
 
 function ts_crudActualizarSeleccionado() {
@@ -3159,6 +3541,99 @@ function ts_crudActualizarSeleccionado() {
 }
 
 
+function ts_crudPrepararPaginaActualizacion() {
+    ts_crudRegistroSeleccionado = null;
+    const btn = document.getElementById("tsCrudActualizarPaginaBtn");
+    if (btn) btn.disabled = true;
+    const buscar = document.getElementById("tsCrudBuscarPagina");
+    if (buscar) buscar.value = "";
+    ts_crudRenderizarPaginaActualizacion();
+}
+
+function ts_crudRenderizarPaginaActualizacion() {
+    const body = document.getElementById("tsCrudRegistrosPaginaBody");
+    const empty = document.getElementById("tsCrudSinRegistrosPagina");
+    if (!body || !empty) return;
+
+    const query = (document.getElementById("tsCrudBuscarPagina")?.value || "").trim().toLowerCase();
+    const registros = ts_crudLeerRegistros()
+        .filter(r => {
+            const c = r.configuracionSerie || {};
+            return [r.id, r.titulo?.texto, c.periodicidad]
+                .some(v => String(v || "").toLowerCase().includes(query));
+        })
+        .sort((a,b) => String(b.actualizadoEn || "").localeCompare(String(a.actualizadoEn || "")));
+
+    body.innerHTML = "";
+    empty.classList.toggle("d-none", registros.length !== 0);
+
+    registros.forEach(registro => {
+        const c = registro.configuracionSerie || {};
+        const deshabilitado = registro.habilitado === false;
+        const seleccionado = ts_crudRegistroSeleccionado === registro.id;
+        const tr = document.createElement("tr");
+        tr.classList.add("ts-crud-selectable-row");
+        tr.dataset.registroId = registro.id;
+        tr.tabIndex = 0;
+        tr.setAttribute("role", "button");
+        tr.setAttribute("aria-selected", seleccionado ? "true" : "false");
+        if (deshabilitado) tr.classList.add("ts-crud-row-disabled");
+        if (seleccionado) tr.classList.add("ts-crud-row-selected");
+
+        tr.addEventListener("click", event => {
+            if (event.target.closest("button, a, input, select, textarea")) return;
+            ts_crudSeleccionarRegistro(registro.id);
+        });
+        tr.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                ts_crudSeleccionarRegistro(registro.id);
+            }
+        });
+
+        tr.innerHTML = `
+            <td><span class="badge text-bg-light border">${ts_escapeHtml(registro.id)}</span></td>
+            <td>
+              <div class="fw-semibold">${ts_escapeHtml(registro.titulo?.texto || "Sin título")}</div>
+              ${deshabilitado ? '<small class="badge text-bg-secondary mt-1">Deshabilitado</small>' : ''}
+            </td>
+            <td>${ts_escapeHtml(c.periodicidad || "—")}</td>
+            <td class="text-nowrap"><small>${ts_crudFecha(registro.actualizadoEn)}</small></td>
+            <td class="text-end text-nowrap">
+              <button class="btn btn-sm ${deshabilitado ? 'btn-outline-success' : 'btn-outline-danger'}"
+                      title="${deshabilitado ? 'Habilitar' : 'Deshabilitar'}"
+                      onclick="event.stopPropagation(); ts_crudCambiarEstado('${registro.id}')">
+                <i class="bi ${deshabilitado ? 'bi-check-circle' : 'bi-slash-circle'} me-1"></i>
+                ${deshabilitado ? 'Habilitar' : 'Deshabilitar'}
+              </button>
+            </td>`;
+        body.appendChild(tr);
+    });
+}
+
+function ts_crudActualizarDesdePagina() {
+    if (!ts_crudRegistroSeleccionado) {
+        ts_mostrarMensaje("Seleccione un cuadro para actualizar.", "warning");
+        return;
+    }
+    const registro = ts_crudLeerRegistros().find(r => r.id === ts_crudRegistroSeleccionado);
+    if (!registro) {
+        ts_mostrarMensaje("El registro seleccionado ya no existe.", "warning");
+        ts_crudPrepararPaginaActualizacion();
+        return;
+    }
+    ts_crudOrigenActualizacionPagina = true;
+    if (typeof showView === "function") showView("tables");
+    document.querySelectorAll('.sidebar-nav .nav-link').forEach(l => l.classList.remove('active'));
+    document.querySelector('[data-view="tables-update"]')?.classList.add('active');
+
+    const nuevoBtn = document.getElementById("tsNuevoBtn");
+    if (nuevoBtn) nuevoBtn.classList.add("d-none");
+
+    ts_crudAplicarRegistro(registro);
+    ts_mostrarMensaje(`Editando ${registro.id}. Al oprimir Actualizar regresará al listado de cuadros y series.`, "info");
+}
+
 function ts_crudCambiarEstado(id) {
     const registros = ts_crudLeerRegistros();
     const registro = registros.find(r => r.id === id);
@@ -3170,7 +3645,13 @@ function ts_crudCambiarEstado(id) {
     registro.habilitado = registro.habilitado === false;
     registro.actualizadoEn = new Date().toISOString();
     ts_crudPersistirRegistros(registros);
+
+    // Refrescar tanto el modal como la vista de Cuadros y Series > Actualizar.
+    // Antes solo se redibujaba el modal y por eso el botón de la página
+    // permanecía visualmente como “Deshabilitar”.
     ts_crudRenderizarRegistros();
+    ts_crudRenderizarPaginaActualizacion();
+
     ts_mostrarMensaje(
         registro.habilitado === false
             ? `Cuadro ${id} deshabilitado correctamente.`
@@ -3316,12 +3797,13 @@ let ts_sqlConexionActiva = false;
 function ts_mostrarModoCuadros(crearNuevo = false) {
     const cuadros = document.getElementById('tsModoCuadros');
     const consulta = document.getElementById('tsModoConsulta');
-    const actualizar = document.getElementById('tsCrudActualizarBtn');
     const guardar = document.getElementById('tsCrudGuardarBtn');
+    const nuevo = document.getElementById('tsNuevoBtn');
 
+    if (crearNuevo) ts_crudOrigenActualizacionPagina = false;
+    nuevo?.classList.toggle('d-none', ts_crudOrigenActualizacionPagina);
     cuadros?.classList.remove('d-none');
-    consulta?.classList.add('d-none');
-    actualizar?.classList.remove('d-none');
+    // La consulta SQL ahora vive en su propia vista SPA (sql-create).
     guardar?.classList.remove('d-none');
 
     if (crearNuevo && typeof ts_crudNuevo === 'function') {
@@ -3330,17 +3812,19 @@ function ts_mostrarModoCuadros(crearNuevo = false) {
 }
 
 function ts_mostrarModoConsulta() {
-    const cuadros = document.getElementById('tsModoCuadros');
-    const consulta = document.getElementById('tsModoConsulta');
-    const actualizar = document.getElementById('tsCrudActualizarBtn');
-    const guardar = document.getElementById('tsCrudGuardarBtn');
-
-    cuadros?.classList.add('d-none');
-    consulta?.classList.remove('d-none');
-    actualizar?.classList.add('d-none');
-    guardar?.classList.add('d-none');
-
-    // La pantalla inicia sin una conexión validada.
+    if (typeof showView === 'function') {
+        showView('sql-create');
+        document.querySelectorAll('.sidebar-nav .nav-link').forEach(link => link.classList.remove('active'));
+        document.querySelector('[data-view="sql-create"]')?.classList.add('active');
+        const submenu = document.getElementById('consultasSqlSubmenu');
+        const btn = document.getElementById('consultasSqlMenuBtn');
+        submenu?.classList.remove('d-none');
+        btn?.setAttribute('aria-expanded','true');
+        btn?.classList.add('submenu-open');
+    } else {
+        document.getElementById('sql-create')?.classList.remove('d-none');
+    }
+    document.getElementById('tsModoConsulta')?.classList.remove('d-none');
     ts_sqlRestablecerEstadoConexion(false);
 }
 
@@ -3476,6 +3960,10 @@ function ts_sqlGuardarConsulta() {
     }
 
     localStorage.setItem(clave, JSON.stringify(registros));
+
+    if (window.PanelWebConsultas?.agregarDesdeCreador) {
+        window.PanelWebConsultas.agregarDesdeCreador(registro);
+    }
 
     if (ayuda) {
         ayuda.textContent = existente >= 0
