@@ -1109,7 +1109,7 @@ function ts_actualizarInformacionSerie() {
             </div>
 
             <div class="series-information-item series-information-period">
-                <div class="series-information-label">Periodo disponible</div>
+                <div class="series-information-label">Periodo requerido</div>
                 <div class="series-information-value">${ts_escapeHtml(periodoDisponible)}</div>
             </div>
 
@@ -1153,6 +1153,8 @@ function ts_formatearPeriodo(periodo) {
    ========================================================= */
 
 let ts_seriesDatos = [];
+// Relaciones Serie de tiempo → Cuadros consumidores.
+let ts_vinculosSeriesCuadros = {};
 
 let ts_siguienteSerieId = 1;
 
@@ -1417,6 +1419,18 @@ function ts_editorDatosAgregarColumna() {
     ts_editorDatosRender();
 }
 
+function ts_editorDatosFormatearMoneda(value) {
+    if (value === null || value === undefined || value === "") return "";
+    const numero = typeof value === "number" ? value : Number(String(value).replace(/[$,\s]/g, ""));
+    if (!Number.isFinite(numero)) return String(value);
+    return new Intl.NumberFormat("es-MX", {
+        style: "currency",
+        currency: "MXN",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(numero);
+}
+
 function ts_editorDatosCambiarCelda(serieId, afore, periodoId, input) {
     if (!ts_editorDatosActivo) return;
     const key = ts_datosClave(serieId, afore, periodoId);
@@ -1424,10 +1438,13 @@ function ts_editorDatosCambiarCelda(serieId, afore, periodoId, input) {
     const texto = String(input.value ?? "").trim();
     let nuevo = null;
     if (texto !== "") {
-        const normalizado = texto.replace(/,/g, "");
-        nuevo = Number.isFinite(Number(normalizado)) ? Number(normalizado) : texto;
+        const normalizado = texto.replace(/[^0-9.\-]/g, "");
+        nuevo = normalizado !== "" && Number.isFinite(Number(normalizado)) ? Number(normalizado) : texto;
     }
-    if (String(anterior ?? "") === String(nuevo ?? "")) return;
+    if (String(anterior ?? "") === String(nuevo ?? "")) {
+        input.value = ts_editorDatosFormatearMoneda(anterior);
+        return;
+    }
     ts_editorDatosRegistrarCambio();
     ts_editorDatosDraft.valores[key] = nuevo;
     ts_editorDatosRender();
@@ -1518,8 +1535,8 @@ function ts_editorDatosRender() {
             d.periodos.forEach(p => {
                 const key = ts_datosClave(serie.id, afore, p.id);
                 const value = d.valores[key];
-                const display = value === null || value === undefined ? "" : value;
-                html += `<td class="ts-data-cell"><div class="input-group input-group-sm"><input class="form-control text-end ts-data-cell-input ${display === "" ? "is-empty" : ""}" value="${ts_escapeHtml(String(display))}" aria-label="Valor ${ts_escapeHtml(afore)} ${ts_escapeHtml(p.label)}" onchange="ts_editorDatosCambiarCelda(${serie.id}, '${String(afore).replace(/'/g,"\\'")}', '${p.id}', this)"><button class="btn btn-outline-secondary" type="button" title="Limpiar valor" onclick="ts_editorDatosLimpiarCelda(${serie.id}, '${String(afore).replace(/'/g,"\\'")}', '${p.id}')"><i class="bi bi-x-lg"></i></button></div></td>`;
+                const display = value === null || value === undefined ? "" : ts_editorDatosFormatearMoneda(value);
+                html += `<td class="ts-data-cell"><div class="input-group input-group-sm ts-currency-input-group"><span class="input-group-text ts-currency-prefix" aria-hidden="true">MXN</span><input class="form-control text-end ts-data-cell-input ${display === "" ? "is-empty" : ""}" inputmode="decimal" autocomplete="off" value="${ts_escapeHtml(String(display))}" aria-label="Valor monetario ${ts_escapeHtml(afore)} ${ts_escapeHtml(p.label)}" onchange="ts_editorDatosCambiarCelda(${serie.id}, '${String(afore).replace(/'/g,"\\'")}', '${p.id}', this)"><button class="btn btn-outline-secondary" type="button" title="Limpiar valor" aria-label="Limpiar valor" onclick="ts_editorDatosLimpiarCelda(${serie.id}, '${String(afore).replace(/'/g,"\\'")}', '${p.id}')"><i class="bi bi-x-lg"></i></button></div></td>`;
             });
             html += `<td class="text-center"><button type="button" class="btn btn-sm btn-outline-danger" onclick="ts_editorDatosQuitarAfore(${serie.id}, '${String(afore).replace(/'/g,"\\'")}')" title="Quitar esta AFORE de la serie"><i class="bi bi-trash3 me-1"></i>Quitar</button></td></tr>`;
         });
@@ -1939,6 +1956,8 @@ function ts_actualizarCatalogoSeriesPadre() {
             selectedValue;
 
     }
+
+    if (typeof ts_vinculosActualizarCatalogo === "function") ts_vinculosActualizarCatalogo();
 
 }
 
@@ -3216,6 +3235,7 @@ function ts_crudRecolectarFormulario() {
         },
         configuracionSerie: ts_crudClonar(ts_configuracionSerie) || {},
         seriesDatos: ts_crudClonar(ts_seriesDatos) || [],
+        vinculosSeriesCuadros: ts_crudClonar(ts_vinculosSeriesCuadros) || {},
         periodosDatos: ts_crudClonar(ts_periodosDatos) || [],
         valoresDatos: ts_crudClonar(ts_valoresDatos) || {},
         siguienteSerieId: ts_siguienteSerieId,
@@ -3299,6 +3319,7 @@ function ts_crudNuevo() {
     ts_series = [];
     ts_datos = [];
     ts_seriesDatos = [];
+    ts_vinculosSeriesCuadros = {};
     ts_periodosDatos = [
         { id: "p1", label: "JUNIO 2025" },
         { id: "p2", label: "MAYO 2026" },
@@ -3368,6 +3389,7 @@ function ts_crudAplicarRegistro(registro) {
 
     ts_configuracionSerie = ts_crudClonar(c) || {};
     ts_seriesDatos = ts_crudClonar(registro.seriesDatos) || [];
+    ts_vinculosSeriesCuadros = ts_crudClonar(registro.vinculosSeriesCuadros) || {};
     ts_periodosDatos = ts_crudClonar(registro.periodosDatos) || [
         { id: "p1", label: "JUNIO 2025" },
         { id: "p2", label: "MAYO 2026" },
@@ -3483,6 +3505,11 @@ function ts_crudRenderizarRegistros() {
               ${deshabilitado ? '<small class="badge text-bg-secondary mt-1">Deshabilitado</small>' : ''}
             </td>
             <td>${ts_escapeHtml(c.periodicidad || "—")}</td>
+            <td class="text-center">
+              <span class="badge rounded-pill ${ts_vinculosContarRegistro(registro) ? 'text-bg-primary' : 'text-bg-light border text-secondary'}">
+                <i class="bi bi-link-45deg me-1"></i>${ts_vinculosContarRegistro(registro)}
+              </span>
+            </td>
             <td class="text-nowrap"><small>${ts_crudFecha(registro.actualizadoEn)}</small></td>
             <td class="text-end text-nowrap">
               <button class="btn btn-sm ${deshabilitado ? 'btn-outline-success' : 'btn-outline-danger'}" 
@@ -3694,7 +3721,7 @@ function ts_crudConstruirDetalle(registro) {
             <div class="series-information-item"><div class="series-information-label">Número de decimales</div><div class="series-information-value">${ts_escapeHtml(String(c.decimales ?? "—"))}</div></div>
             <div class="series-information-item"><div class="series-information-label">Tipo de cifra</div><div class="series-information-value">${ts_escapeHtml(c.tipoCifra || "—")}</div></div>
             <div class="series-information-item"><div class="series-information-label">Periodicidad</div><div class="series-information-value">${ts_escapeHtml(c.periodicidad || "—")}</div></div>
-            <div class="series-information-item"><div class="series-information-label">Periodo disponible</div><div class="series-information-value">${ts_escapeHtml(periodo)}</div></div>
+            <div class="series-information-item"><div class="series-information-label">Periodo requerido</div><div class="series-information-value">${ts_escapeHtml(periodo)}</div></div>
             <div class="series-information-item"><div class="series-information-label">Unidad de medida</div><div class="series-information-value">${ts_escapeHtml(c.unidad || "—")}</div></div>
           </div>
         </section>
@@ -4084,3 +4111,205 @@ document.addEventListener('click', function(event) {
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') ts_cerrarNuevoMenu();
 });
+
+
+/* =========================================================
+   VINCULACION: SERIES DE TIEMPO → CUADROS CONSUMIDORES
+   ========================================================= */
+function ts_vinculosSerieKey(id) {
+    return String(id ?? "");
+}
+
+function ts_vinculosDepurar() {
+    const idsSeries = new Set(ts_seriesDatos.map(s => ts_vinculosSerieKey(s.id)));
+    Object.keys(ts_vinculosSeriesCuadros || {}).forEach(key => {
+        if (!idsSeries.has(String(key))) delete ts_vinculosSeriesCuadros[key];
+        else if (!Array.isArray(ts_vinculosSeriesCuadros[key])) ts_vinculosSeriesCuadros[key] = [];
+    });
+}
+
+function ts_vinculosContarRegistro(registro) {
+    const mapa = registro?.vinculosSeriesCuadros || {};
+    return Object.values(mapa).reduce((total, ids) => total + (Array.isArray(ids) ? ids.length : 0), 0);
+}
+
+function ts_vinculosActualizarCatalogo() {
+    const select = document.getElementById('tsVinculoSerie');
+    const lista = document.getElementById('tsVinculoCuadrosLista');
+    if (!select || !lista) return;
+
+    ts_vinculosDepurar();
+    const anterior = select.value;
+    select.innerHTML = '<option value="">Seleccione una serie de tiempo...</option>';
+    ts_seriesDatos.forEach(serie => {
+        const op = document.createElement('option');
+        op.value = String(serie.id);
+        op.textContent = `${'— '.repeat(Number(serie.indent || 0))}${serie.title}`;
+        select.appendChild(op);
+    });
+    if (ts_seriesDatos.some(s => String(s.id) === anterior)) select.value = anterior;
+    else if (ts_seriesDatos.length === 1) select.value = String(ts_seriesDatos[0].id);
+
+    ts_vinculosRenderCuadros();
+    ts_vinculosRenderResumen();
+}
+
+let ts_vinculosPagina = 1;
+const TS_VINCULOS_POR_PAGINA = 7;
+let ts_vinculosPaginaIds = [];
+
+function ts_vinculosAplicarFiltros() {
+    ts_vinculosPagina = 1;
+    ts_vinculosRenderCuadros();
+}
+
+function ts_vinculosObtenerRegistrosFiltrados(serieId) {
+    const busqueda = String(document.getElementById('tsVinculoBuscarCuadro')?.value || '').trim().toLowerCase();
+    const soloSeleccionados = !!document.getElementById('tsVinculoSoloSeleccionados')?.checked;
+    const seleccionados = new Set((ts_vinculosSeriesCuadros[ts_vinculosSerieKey(serieId)] || []).map(String));
+
+    return ts_crudLeerRegistros()
+        .filter(r => r.id !== ts_crudIdActual)
+        .filter(r => {
+            if (soloSeleccionados && !seleccionados.has(String(r.id))) return false;
+            if (!busqueda) return true;
+            const texto = [
+                r.id,
+                r.titulo?.texto,
+                r.configuracionSerie?.periodicidad
+            ].map(v => String(v || '').toLowerCase()).join(' ');
+            return texto.includes(busqueda);
+        })
+        .sort((a,b) => String(a.titulo?.texto || '').localeCompare(String(b.titulo?.texto || ''), 'es'));
+}
+
+function ts_vinculosCambiarPagina(pagina) {
+    const numero = Number(pagina);
+    if (!Number.isFinite(numero)) return;
+    ts_vinculosPagina = Math.max(1, Math.floor(numero));
+    ts_vinculosRenderCuadros();
+}
+
+function ts_vinculosSeleccionarPagina(checked) {
+    const serieId = document.getElementById('tsVinculoSerie')?.value;
+    if (!serieId || !ts_vinculosPaginaIds.length) return;
+    const key = ts_vinculosSerieKey(serieId);
+    const actuales = new Set((ts_vinculosSeriesCuadros[key] || []).map(String));
+    ts_vinculosPaginaIds.forEach(id => checked ? actuales.add(String(id)) : actuales.delete(String(id)));
+    ts_vinculosSeriesCuadros[key] = Array.from(actuales);
+    ts_vinculosRenderCuadros();
+    ts_vinculosRenderResumen();
+}
+
+function ts_vinculosRenderCuadros() {
+    const select = document.getElementById('tsVinculoSerie');
+    const lista = document.getElementById('tsVinculoCuadrosLista');
+    const paginacion = document.getElementById('tsVinculoPaginacion');
+    const resultados = document.getElementById('tsVinculoResultados');
+    const contadorSeleccionados = document.getElementById('tsVinculoSeleccionados');
+    if (!select || !lista) return;
+
+    const serieId = select.value;
+    ts_vinculosPaginaIds = [];
+    if (!serieId) {
+        lista.innerHTML = '<div class="ts-link-empty"><i class="bi bi-arrow-up-circle me-2"></i>Selecciona primero una serie de tiempo.</div>';
+        if (paginacion) paginacion.classList.add('d-none');
+        if (resultados) resultados.textContent = '0 cuadros';
+        if (contadorSeleccionados) contadorSeleccionados.textContent = '0 seleccionados';
+        return;
+    }
+
+    const seleccionados = new Set((ts_vinculosSeriesCuadros[ts_vinculosSerieKey(serieId)] || []).map(String));
+    if (contadorSeleccionados) contadorSeleccionados.textContent = `${seleccionados.size} seleccionado${seleccionados.size === 1 ? '' : 's'}`;
+
+    const todosDisponibles = ts_crudLeerRegistros().filter(r => r.id !== ts_crudIdActual);
+    if (!todosDisponibles.length) {
+        lista.innerHTML = '<div class="ts-link-empty"><i class="bi bi-inbox me-2"></i>No hay otros cuadros registrados disponibles para vincular.</div>';
+        if (paginacion) paginacion.classList.add('d-none');
+        if (resultados) resultados.textContent = '0 cuadros';
+        return;
+    }
+
+    const registros = ts_vinculosObtenerRegistrosFiltrados(serieId);
+    const totalPaginas = Math.max(1, Math.ceil(registros.length / TS_VINCULOS_POR_PAGINA));
+    ts_vinculosPagina = Math.min(Math.max(1, ts_vinculosPagina), totalPaginas);
+    const inicio = (ts_vinculosPagina - 1) * TS_VINCULOS_POR_PAGINA;
+    const visibles = registros.slice(inicio, inicio + TS_VINCULOS_POR_PAGINA);
+    ts_vinculosPaginaIds = visibles.map(r => String(r.id));
+
+    if (resultados) {
+        if (!registros.length) resultados.textContent = 'Sin coincidencias';
+        else resultados.textContent = `${inicio + 1}–${inicio + visibles.length} de ${registros.length} cuadros`;
+    }
+
+    if (!visibles.length) {
+        lista.innerHTML = '<div class="ts-link-empty"><i class="bi bi-search me-2"></i>No hay cuadros que coincidan con los filtros actuales.</div>';
+    } else {
+        lista.innerHTML = visibles.map(r => {
+            const checked = seleccionados.has(String(r.id)) ? 'checked' : '';
+            const periodicidad = r.configuracionSerie?.periodicidad || 'Sin periodicidad';
+            return `
+              <label class="ts-link-consumer ${checked ? 'is-linked' : ''}">
+                <input type="checkbox" class="form-check-input" ${checked}
+                       onchange="ts_vinculosToggle('${ts_escapeHtml(String(r.id))}', this.checked)">
+                <span class="ts-link-consumer-main">
+                  <span class="ts-link-consumer-title" title="${ts_escapeHtml(r.titulo?.texto || 'Sin título')}">${ts_escapeHtml(r.titulo?.texto || 'Sin título')}</span>
+                  <span class="ts-link-consumer-meta"><span>${ts_escapeHtml(r.id)}</span><span>•</span><span>${ts_escapeHtml(periodicidad)}</span></span>
+                </span>
+                <span class="ts-link-state" title="${checked ? 'Vinculado' : 'Agregar vínculo'}"><i class="bi ${checked ? 'bi-link-45deg' : 'bi-plus-circle'}"></i></span>
+              </label>`;
+        }).join('');
+    }
+
+    if (paginacion) {
+        if (totalPaginas <= 1) {
+            paginacion.classList.add('d-none');
+            paginacion.innerHTML = '';
+        } else {
+            paginacion.classList.remove('d-none');
+            paginacion.innerHTML = `
+              <button type="button" class="btn btn-outline-secondary btn-sm" ${ts_vinculosPagina <= 1 ? 'disabled' : ''}
+                      onclick="ts_vinculosCambiarPagina(${ts_vinculosPagina - 1})" aria-label="Página anterior">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+              <span class="ts-link-page-status">Página <strong>${ts_vinculosPagina}</strong> de ${totalPaginas}</span>
+              <button type="button" class="btn btn-outline-secondary btn-sm" ${ts_vinculosPagina >= totalPaginas ? 'disabled' : ''}
+                      onclick="ts_vinculosCambiarPagina(${ts_vinculosPagina + 1})" aria-label="Página siguiente">
+                <i class="bi bi-chevron-right"></i>
+              </button>`;
+        }
+    }
+}
+function ts_vinculosToggle(cuadroId, checked) {
+    const serieId = document.getElementById('tsVinculoSerie')?.value;
+    if (!serieId) return;
+    const key = ts_vinculosSerieKey(serieId);
+    const actuales = new Set((ts_vinculosSeriesCuadros[key] || []).map(String));
+    if (checked) actuales.add(String(cuadroId));
+    else actuales.delete(String(cuadroId));
+    ts_vinculosSeriesCuadros[key] = Array.from(actuales);
+    ts_vinculosRenderCuadros();
+    ts_vinculosRenderResumen();
+}
+
+function ts_vinculosRenderResumen() {
+    const resumen = document.getElementById('tsVinculosResumen');
+    const contador = document.getElementById('tsVinculosContador');
+    if (!resumen) return;
+    ts_vinculosDepurar();
+    const catalogo = new Map(ts_crudLeerRegistros().map(r => [String(r.id), r]));
+    let total = 0;
+    const filas = ts_seriesDatos.map(serie => {
+        const ids = (ts_vinculosSeriesCuadros[ts_vinculosSerieKey(serie.id)] || []).map(String);
+        total += ids.length;
+        if (!ids.length) return '';
+        const destinos = ids.map(id => {
+            const r = catalogo.get(id);
+            return `<span class="badge ts-link-badge"><i class="bi bi-table me-1"></i>${ts_escapeHtml(r?.titulo?.texto || id)}</span>`;
+        }).join('');
+        return `<div class="ts-link-summary-row"><div><strong>${ts_escapeHtml(serie.title)}</strong><small>Serie de tiempo</small></div><div class="ts-link-summary-targets">${destinos}</div></div>`;
+    }).filter(Boolean).join('');
+    if (contador) contador.textContent = String(total);
+    resumen.innerHTML = filas || '<div class="ts-link-empty"><i class="bi bi-link-45deg me-2"></i>Aún no hay vínculos configurados.</div>';
+}
+

@@ -114,3 +114,10 @@
 @media (max-width: 768px) {
   #webEditorPreviewModal .web-editor-preview-document { padding: 1.25rem; min-height: 420px; }
 }
+
+/* Homologacion tipografica con el menu principal */
+#editor, #webEditorPreviewModal,
+#editor input, #editor select, #editor textarea, #editor button,
+#webEditorPreviewModal input, #webEditorPreviewModal select, #webEditorPreviewModal textarea, #webEditorPreviewModal button {
+  font-family: var(--ux-font, Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif) !important;
+}

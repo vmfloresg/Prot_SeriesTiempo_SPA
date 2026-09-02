@@ -96,6 +96,13 @@ function initPanelWeb() {
     const mesesPendientesActivos = document.getElementById("mesesPendientesActivos");
     const btnCerrarPanelMesesPendientes = document.getElementById("btnCerrarPanelMesesPendientes");
 
+    const btnNotificacionPendientes = document.getElementById("btnNotificacionPendientes");
+    const detalleNotificacionPendientes = document.getElementById("detalleNotificacionPendientes");
+    const btnCerrarDetallePendientes = document.getElementById("btnCerrarDetallePendientes");
+    const textoEstadoPendientes = document.getElementById("textoEstadoPendientes");
+    const textoDetallePendientes = document.getElementById("textoDetallePendientes");
+    const contadorPendientes = document.getElementById("contadorPendientes");
+
 
     const btnMarcarTodosModal = document.getElementById("btnMarcarTodosModal");
     const chkSeleccionarTodosCuadrosCarga = document.getElementById("chkSeleccionarTodosCuadrosCarga");
@@ -201,6 +208,53 @@ function initPanelWeb() {
 
     //Inicia Semaforo de meses pendientes
 
+    function esPendienteUrgente(item = {}) {
+        const prioridad = String(item.prioridad || "").toLowerCase();
+        return item.urgente === true || prioridad === "urgente" || prioridad === "alta";
+    }
+
+    function cerrarDetalleNotificacionPendientes() {
+        if (!detalleNotificacionPendientes || !btnNotificacionPendientes) return;
+        detalleNotificacionPendientes.classList.add("d-none");
+        detalleNotificacionPendientes.setAttribute("aria-hidden", "true");
+        btnNotificacionPendientes.setAttribute("aria-expanded", "false");
+        btnNotificacionPendientes.classList.remove("is-open");
+    }
+
+    function actualizarBotonNotificacionPendientes(listaPendientes = []) {
+        if (!btnNotificacionPendientes) return;
+
+        const total = listaPendientes.length;
+        const urgentes = listaPendientes.filter(esPendienteUrgente).length;
+
+        btnNotificacionPendientes.classList.remove(
+            "pw-notification-success",
+            "pw-notification-warning",
+            "pw-notification-danger"
+        );
+
+        if (total === 0) {
+            btnNotificacionPendientes.classList.add("pw-notification-success");
+            if (textoEstadoPendientes) textoEstadoPendientes.textContent = "Sin actualizaciones pendientes";
+            if (textoDetallePendientes) textoDetallePendientes.textContent = "Todo se encuentra actualizado.";
+        } else if (urgentes > 0) {
+            btnNotificacionPendientes.classList.add("pw-notification-danger");
+            if (textoEstadoPendientes) textoEstadoPendientes.textContent = "Atención urgente";
+            if (textoDetallePendientes) textoDetallePendientes.textContent = `${urgentes} actualización${urgentes === 1 ? "" : "es"} urgente${urgentes === 1 ? "" : "s"} de ${total} pendiente${total === 1 ? "" : "s"}.`;
+        } else {
+            btnNotificacionPendientes.classList.add("pw-notification-warning");
+            if (textoEstadoPendientes) textoEstadoPendientes.textContent = "Actualizaciones pendientes";
+            if (textoDetallePendientes) textoDetallePendientes.textContent = `${total} actualización${total === 1 ? "" : "es"} requieren atención.`;
+        }
+
+        if (contadorPendientes) {
+            contadorPendientes.textContent = String(total);
+            contadorPendientes.setAttribute("aria-label", `${total} actualizaciones pendientes`);
+        }
+
+        if (total === 0) cerrarDetalleNotificacionPendientes();
+    }
+
     function agruparPendientesPorAnio(listaPendientes = []) {
         return listaPendientes.reduce((acc, item) => {
             const anio = String(item.anio);
@@ -211,6 +265,7 @@ function initPanelWeb() {
     }
 
     function renderSemaforoPendientes(listaPendientes = []) {
+        actualizarBotonNotificacionPendientes(listaPendientes);
         if (!botonesPendientesPorAnio || !panelMesesPendientes || !anioPendienteActivo || !mesesPendientesActivos) return;
 
         const agrupados = agruparPendientesPorAnio(listaPendientes);
@@ -226,22 +281,27 @@ function initPanelWeb() {
             return;
         }
 
-        botonesPendientesPorAnio.innerHTML = anios.map((anio) => `
+        botonesPendientesPorAnio.innerHTML = anios.map((anio) => {
+            const tieneUrgente = listaPendientes.some((item) => String(item.anio) === String(anio) && esPendienteUrgente(item));
+            return `
         <button type="button"
-                class="badge rounded-pill bg-warning text-dark px-2 py-1  btn-anio-pendiente"
+                class="badge rounded-pill ${tieneUrgente ? "bg-danger text-white" : "bg-warning text-dark"} px-2 py-1 btn-anio-pendiente"
                 data-anio="${anio}">
-            Año ${anio}
+            ${tieneUrgente ? '<i class="bi bi-exclamation-triangle-fill me-1"></i>' : ""}Año ${anio}
         </button>
-    `).join("");
+    `;
+        }).join("");
 
         const btns = botonesPendientesPorAnio.querySelectorAll(".btn-anio-pendiente");
 
         const mostrarMeses = (anio) => {
             const meses = agrupados[anio] || [];
             anioPendienteActivo.textContent = anio;
-            mesesPendientesActivos.innerHTML = meses.map((mes) => `
-            <span class="badge rounded-pill bg-warning text-dark px-3 py-2">${mes}</span>
-        `).join("");
+            mesesPendientesActivos.innerHTML = meses.map((mes) => {
+                const item = listaPendientes.find((p) => String(p.anio) === String(anio) && p.mes === mes) || {};
+                const urgente = esPendienteUrgente(item);
+                return `<span class="badge rounded-pill ${urgente ? "bg-danger text-white" : "bg-warning text-dark"} px-3 py-2">${urgente ? '<i class="bi bi-exclamation-triangle-fill me-1"></i>' : ""}${mes}</span>`;
+            }).join("");
             panelMesesPendientes.classList.remove("d-none");
         };
 
@@ -266,6 +326,20 @@ function initPanelWeb() {
 
 
 
+
+    if (btnNotificacionPendientes && detalleNotificacionPendientes) {
+        btnNotificacionPendientes.addEventListener("click", () => {
+            const seAbrira = detalleNotificacionPendientes.classList.contains("d-none");
+            detalleNotificacionPendientes.classList.toggle("d-none", !seAbrira);
+            detalleNotificacionPendientes.setAttribute("aria-hidden", String(!seAbrira));
+            btnNotificacionPendientes.setAttribute("aria-expanded", String(seAbrira));
+            btnNotificacionPendientes.classList.toggle("is-open", seAbrira);
+        });
+    }
+
+    if (btnCerrarDetallePendientes) {
+        btnCerrarDetallePendientes.addEventListener("click", cerrarDetalleNotificacionPendientes);
+    }
 
     function renderPendientesAgrupados(listaPendientes = []) {
         if (!pendientesAgrupadosPorAnio) return;
@@ -563,7 +637,7 @@ function renderCuadrosDashboard(filtro = "todos") {
             estadoCarga: "En validación",
             progreso: 45,
             pendientes: [
-                { anio: 2025, mes: "Enero" },
+                { anio: 2025, mes: "Enero", urgente: true, prioridad: "urgente" },
                 { anio: 2025, mes: "Febrero" },
                 { anio: 2026, mes: "Marzo" },
                 { anio: 2026, mes: "Abril" }

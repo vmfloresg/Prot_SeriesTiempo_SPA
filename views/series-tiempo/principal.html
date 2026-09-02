@@ -17,6 +17,24 @@
 </div>
 </div>
 </div>
+
+<div class="ts-create-flow" aria-label="Flujo de creación de cuadros y series">
+  <div class="ts-flow-item is-active">
+    <span class="ts-flow-icon"><i class="bi bi-sliders"></i></span>
+    <span><strong>1. Configura</strong><small>Define estructura y contenido</small></span>
+  </div>
+  <span class="ts-flow-line" aria-hidden="true"></span>
+  <div class="ts-flow-item">
+    <span class="ts-flow-icon"><i class="bi bi-eye"></i></span>
+    <span><strong>2. Revisa</strong><small>Valida la previsualización</small></span>
+  </div>
+  <span class="ts-flow-line" aria-hidden="true"></span>
+  <div class="ts-flow-item">
+    <span class="ts-flow-icon"><i class="bi bi-check2-circle"></i></span>
+    <span><strong>3. Finaliza</strong><small>Guarda o genera plantilla</small></span>
+  </div>
+</div>
+
 <div id="tsModoCuadros">
 <div class="row g-0 workspace">
 <!-- ================================================= -->
@@ -98,7 +116,7 @@
 <option value="Semestral"> Semestral </option>
 <option value="Anual"> Anual </option>
 </select> </div> <!-- PERIODO DISPONIBLE -->
-<div class="mb-3"> <label class="form-label"> Periodo disponible </label>
+<div class="mb-3"> <label class="form-label"> Periodo requerido </label>
 <div class="row g-2">
 <div class="col-6"> <input class="form-control" id="availablePeriodStart" type="month"/> </div>
 <div class="col-6"> <input class="form-control" id="availablePeriodEnd" type="month"/> </div>
@@ -301,7 +319,7 @@
 <!-- 4. NOTAS -->
 <!-- ================================================= -->
 <div class="accordion-item">
-<h2 class="accordion-header"> <button class="accordion-button collapsed" data-bs-target="#sectionNotes" data-bs-toggle="collapse" type="button"> <span class="section-number">4</span> <span> <strong>Notas y fuentes</strong>
+<h2 class="accordion-header"> <button class="accordion-button collapsed" data-bs-target="#sectionNotes" data-bs-toggle="collapse" type="button"> <span class="section-number">5</span> <span> <strong>Notas y fuentes</strong>
 <small>Información complementaria</small> </span> </button> </h2>
 <div class="accordion-collapse collapse" data-bs-parent="#configurationAccordion" id="sectionNotes">
 <div class="accordion-body">
@@ -472,33 +490,59 @@
 <!-- Modal: editor seguro de Series de datos -->
 <div class="modal fade" id="tsDataEditorModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div>
-          <h5 class="modal-title mb-1"><i class="bi bi-grid-3x3-gap me-2"></i>Edición segura de Series de datos</h5>
-          <div class="small text-muted">Modifique AFORE, columnas y valores sobre una copia temporal. Los cambios se aplican únicamente al guardar.</div>
+    <div class="modal-content ts-safe-editor-modal">
+      <div class="modal-header ts-safe-editor-header">
+        <div class="d-flex align-items-start gap-3">
+          <div class="ts-safe-editor-header-icon" aria-hidden="true"><i class="bi bi-shield-check"></i></div>
+          <div>
+            <div class="ts-safe-editor-eyebrow">Editor protegido de información</div>
+            <h5 class="modal-title mb-1">Edición segura de Series de tiempo</h5>
+            <div class="small text-muted">Trabaja sobre una copia temporal. Nada se aplica al cuadro hasta seleccionar <strong>Guardar cambios</strong>.</div>
+          </div>
         </div>
         <button type="button" class="btn-close" aria-label="Cerrar" onclick="ts_editorDatosCancelar()"></button>
       </div>
       <div class="modal-body">
         <div id="tsDataEditor">
-          <div class="ts-data-editor-toolbar d-flex flex-wrap align-items-center gap-2 mb-3">
-            <button type="button" class="btn btn-sm btn-outline-primary" onclick="ts_editorDatosMostrarAgregarAfore()"><i class="bi bi-person-plus me-1"></i>Agregar AFORE</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="ts_editorDatosAgregarColumna()"><i class="bi bi-layout-three-columns me-1"></i>Agregar columna</button>
-            <button type="button" id="tsDataUndoBtn" class="btn btn-sm btn-outline-secondary" onclick="ts_editorDatosDeshacer()"><i class="bi bi-arrow-counterclockwise me-1"></i>Deshacer</button>
-            <button type="button" id="tsDataRedoBtn" class="btn btn-sm btn-outline-secondary" onclick="ts_editorDatosRehacer()"><i class="bi bi-arrow-clockwise me-1"></i>Rehacer</button>
-            <span class="badge text-bg-warning-subtle text-warning-emphasis ms-lg-auto" id="tsDataPendingBadge">0 cambios pendientes</span>
+          <div class="ts-data-editor-summary mb-3">
+            <div class="ts-data-editor-summary-item">
+              <span class="ts-summary-icon"><i class="bi bi-currency-dollar"></i></span>
+              <div><strong>Valores monetarios</strong><small>Las cifras se muestran en MXN con formato $1,234.56</small></div>
+            </div>
+            <div class="ts-data-editor-summary-item">
+              <span class="ts-summary-icon"><i class="bi bi-clock-history"></i></span>
+              <div><strong>Edición reversible</strong><small>Utiliza Deshacer y Rehacer antes de guardar</small></div>
+            </div>
+            <div class="ts-data-editor-summary-item">
+              <span class="ts-summary-icon"><i class="bi bi-cloud-check"></i></span>
+              <div><strong>Guardado controlado</strong><small>Los cambios se confirman al final del proceso</small></div>
+            </div>
           </div>
-          <div id="tsDataAddAforePanel" class="card border-primary-subtle bg-body-tertiary mb-3 d-none">
+
+          <div class="ts-data-editor-toolbar mb-3">
+            <div class="ts-data-editor-toolbar-group">
+              <span class="ts-toolbar-label">Estructura</span>
+              <button type="button" class="btn btn-sm btn-outline-primary" onclick="ts_editorDatosMostrarAgregarAfore()"><i class="bi bi-person-plus me-1"></i>Agregar AFORE</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" onclick="ts_editorDatosAgregarColumna()"><i class="bi bi-layout-three-columns me-1"></i>Agregar columna</button>
+            </div>
+            <div class="ts-data-editor-toolbar-group">
+              <span class="ts-toolbar-label">Historial</span>
+              <button type="button" id="tsDataUndoBtn" class="btn btn-sm btn-outline-secondary" onclick="ts_editorDatosDeshacer()"><i class="bi bi-arrow-counterclockwise me-1"></i>Deshacer</button>
+              <button type="button" id="tsDataRedoBtn" class="btn btn-sm btn-outline-secondary" onclick="ts_editorDatosRehacer()"><i class="bi bi-arrow-clockwise me-1"></i>Rehacer</button>
+            </div>
+            <span class="badge text-bg-warning-subtle text-warning-emphasis ts-data-pending-badge" id="tsDataPendingBadge">0 cambios pendientes</span>
+          </div>
+
+          <div id="tsDataAddAforePanel" class="card border-primary-subtle bg-body-tertiary mb-3 d-none ts-data-add-afore-panel">
             <div class="card-body py-3">
-              <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+              <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
                 <div>
                   <div class="fw-semibold"><i class="bi bi-diagram-3 me-1"></i>Agregar AFORE al árbol jerárquico</div>
-                  <div class="small text-muted">Seleccione la serie destino y después elija una AFORE del catálogo. Sus valores se crearán vacíos para evitar datos ficticios.</div>
+                  <div class="small text-muted">Selecciona primero la serie destino y después una AFORE disponible. Los nuevos valores se crearán vacíos.</div>
                 </div>
                 <button type="button" class="btn-close" aria-label="Cerrar" onclick="ts_editorDatosOcultarAgregarAfore()"></button>
               </div>
-              <div class="row g-2 align-items-end">
+              <div class="row g-3 align-items-end">
                 <div class="col-md-5">
                   <label for="tsDataAddAforeSerie" class="form-label small fw-semibold mb-1">Serie destino</label>
                   <select id="tsDataAddAforeSerie" class="form-select form-select-sm" onchange="ts_editorDatosActualizarAforesDisponibles()"></select>
@@ -515,13 +559,25 @@
               </div>
             </div>
           </div>
-          <div class="alert alert-light border py-2 small mb-3"><i class="bi bi-shield-check me-1"></i>Los cambios son temporales hasta pulsar <strong>Guardar cambios</strong>. Una celda vacía significa “sin información”; el valor <strong>0</strong> se conserva como cero.</div>
+
+          <div class="ts-data-editor-guidance mb-3">
+            <i class="bi bi-info-circle"></i>
+            <div><strong>Edición segura:</strong> una celda vacía significa “sin información”; el valor <strong>$0.00</strong> se conserva como cero. Puedes escribir cifras sin formato y el sistema las mostrará como moneda al confirmar la celda.</div>
+          </div>
+
+          <div class="ts-data-table-heading">
+            <div>
+              <h6 class="mb-1"><i class="bi bi-table me-2"></i>Series y valores por periodo</h6>
+              <small class="text-muted">Edita las cifras directamente en la tabla. Usa la × para limpiar una celda sin convertirla en cero.</small>
+            </div>
+            <span class="ts-currency-chip"><i class="bi bi-cash-coin me-1"></i>Moneda: MXN</span>
+          </div>
           <div class="table-responsive ts-data-editor-table-wrap"><table class="table table-sm table-bordered align-middle mb-0 ts-data-editor-table"><thead id="tsDataEditorHead"></thead><tbody id="tsDataEditorBody"></tbody></table></div>
         </div>
       </div>
-      <div class="modal-footer d-flex justify-content-between align-items-center">
-        <div class="small text-muted"><i class="bi bi-info-circle me-1"></i>Use Deshacer antes de guardar si necesita recuperar un cambio.</div>
-        <div class="d-flex gap-2">
+      <div class="modal-footer ts-safe-editor-footer d-flex justify-content-between align-items-center">
+        <div class="small text-muted"><i class="bi bi-shield-lock me-1"></i>Los cambios permanecen temporales hasta confirmar el guardado.</div>
+        <div class="d-flex gap-2 ts-safe-editor-footer-actions">
           <button type="button" class="btn btn-outline-secondary" onclick="ts_editorDatosCancelar()">Cancelar</button>
           <button type="button" class="btn btn-primary" onclick="ts_editorDatosGuardar()"><i class="bi bi-check2-circle me-1"></i>Guardar cambios</button>
         </div>
@@ -529,4 +585,85 @@
     </div>
   </div>
 </div>
+
+
+                    <!-- ================================================= -->
+                    <!-- 4. VINCULACION CON CUADROS CONSUMIDORES -->
+                    <!-- ================================================= -->
+                    <div class="accordion-item ts-link-accordion">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#sectionLinks">
+                                <span class="section-number">4</span>
+                                <span>
+                                    <strong>Vincular series con cuadros</strong>
+                                    <small>Define qué cuadros consumen cada serie de tiempo</small>
+                                </span>
+                                <span class="badge rounded-pill text-bg-primary ms-auto me-3" id="tsVinculosContador">0</span>
+                            </button>
+                        </h2>
+                        <div id="sectionLinks" class="accordion-collapse collapse" data-bs-parent="#configurationAccordion">
+                            <div class="accordion-body">
+                                <div class="ts-link-intro mb-3">
+                                    <span class="ts-link-intro-icon"><i class="bi bi-diagram-2"></i></span>
+                                    <div>
+                                        <strong>Serie de tiempo → Cuadro consumidor</strong>
+                                        <p class="mb-0">Selecciona una serie del cuadro actual y después marca uno o varios cuadros que utilizarán esa información.</p>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="tsVinculoSerie" class="form-label">Serie de tiempo origen</label>
+                                    <select id="tsVinculoSerie" class="form-select" onchange="ts_vinculosRenderCuadros()">
+                                        <option value="">Seleccione una serie de tiempo...</option>
+                                    </select>
+                                    <div class="form-text">El catálogo se genera con las series configuradas en el paso anterior.</div>
+                                </div>
+                                <div class="mb-3 ts-link-browser">
+                                    <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                                        <label class="form-label mb-0">Cuadros consumidores</label>
+                                        <span class="badge rounded-pill text-bg-light border" id="tsVinculoSeleccionados">0 seleccionados</span>
+                                    </div>
+
+                                    <div class="ts-link-browser-tools">
+                                        <div class="input-group input-group-sm ts-link-search">
+                                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                            <input type="search" id="tsVinculoBuscarCuadro" class="form-control"
+                                                placeholder="Buscar por nombre, clave o periodicidad..."
+                                                aria-label="Buscar cuadros consumidores"
+                                                oninput="ts_vinculosAplicarFiltros()">
+                                        </div>
+                                        <label class="ts-link-selected-filter">
+                                            <input type="checkbox" class="form-check-input" id="tsVinculoSoloSeleccionados"
+                                                onchange="ts_vinculosAplicarFiltros()">
+                                            <span>Ver sólo seleccionados</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="ts-link-list-actions">
+                                        <span id="tsVinculoResultados" class="text-muted">0 cuadros</span>
+                                        <div class="d-flex gap-1">
+                                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="ts_vinculosSeleccionarPagina(true)">
+                                                <i class="bi bi-check2-square me-1"></i>Seleccionar página
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="ts_vinculosSeleccionarPagina(false)">
+                                                <i class="bi bi-square me-1"></i>Limpiar página
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div id="tsVinculoCuadrosLista" class="ts-link-consumers">
+                                        <div class="ts-link-empty"><i class="bi bi-arrow-up-circle me-2"></i>Selecciona primero una serie de tiempo.</div>
+                                    </div>
+                                    <div id="tsVinculoPaginacion" class="ts-link-pagination d-none"></div>
+                                </div>
+                                <div class="ts-link-summary-card">
+                                    <div class="ts-link-summary-header"><i class="bi bi-share me-2"></i>Mapa de consumo configurado</div>
+                                    <div id="tsVinculosResumen">
+                                        <div class="ts-link-empty"><i class="bi bi-link-45deg me-2"></i>Aún no hay vínculos configurados.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
 

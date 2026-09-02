@@ -344,3 +344,249 @@ body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvet
 #tables-update .ts-crud-row-selected td { border-color: var(--bs-primary-border-subtle); }
 #tables-update .ts-crud-row-selected .fw-semibold { color: var(--bs-primary-text-emphasis); }
 #tables-update .ts-crud-row-disabled:not(.ts-crud-row-selected) { background-color: var(--bs-tertiary-bg); color: var(--bs-secondary-color); }
+
+/* ==========================================================
+   HOMOLOGACION UX/UI GLOBAL - 2026
+   Base visual: modulo Carga de archivos + tipografia del menu.
+   No modifica logica, IDs ni eventos funcionales.
+   ========================================================== */
+:root {
+  --ux-font: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --ux-bg: #f6f8fb;
+  --ux-surface: #ffffff;
+  --ux-surface-soft: #f8fafc;
+  --ux-border: #e4e9f0;
+  --ux-border-strong: #d7dee8;
+  --ux-text: #172033;
+  --ux-muted: #687386;
+  --ux-primary: #0d6efd;
+  --ux-primary-soft: #eef5ff;
+  --ux-success-soft: #eaf7ef;
+  --ux-warning-soft: #fff8e6;
+  --ux-danger-soft: #fff0f1;
+  --ux-radius: 1rem;
+  --ux-radius-sm: .72rem;
+  --ux-shadow: 0 .25rem 1rem rgba(15, 23, 42, .055);
+  --ux-shadow-hover: 0 .5rem 1.4rem rgba(15, 23, 42, .09);
+}
+
+html, body, button, input, select, textarea, table, .tooltip, .popover {
+  font-family: var(--ux-font) !important;
+}
+body {
+  color: var(--ux-text);
+  background: var(--ux-bg);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* El menu es la referencia tipografica del sistema */
+.sidebar-nav .nav-link {
+  font-family: var(--ux-font);
+  font-size: .95rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.sidebar-nav .nav-link.active { font-weight: 650; }
+.sidebar-nav .sidebar-submenu .nav-link { font-size: .91rem; }
+
+/* Jerarquia de pagina */
+#view-title {
+  color: var(--ux-text);
+  font-weight: 720;
+  letter-spacing: -.015em;
+}
+.app-view > h1, .app-view > h2, .app-view > h3,
+.app-view .page-title, .app-view .section-title {
+  color: var(--ux-text);
+  font-weight: 700;
+  letter-spacing: -.012em;
+}
+.app-view .lead { color: var(--ux-muted); }
+.text-muted { color: var(--ux-muted) !important; }
+
+/* Tarjetas y paneles */
+.app-view .card,
+.modal-content,
+.offcanvas,
+.dropdown-menu {
+  border-color: var(--ux-border);
+}
+.app-view .card:not(.border-0),
+.app-view .card-modern,
+.app-view .accordion-item {
+  border: 1px solid var(--ux-border);
+  border-radius: var(--ux-radius);
+  box-shadow: var(--ux-shadow);
+  background: var(--ux-surface);
+}
+.app-view .card-header,
+.app-view .card-footer {
+  background: var(--ux-surface);
+  border-color: var(--ux-border);
+}
+.app-view .card-header:first-child { border-radius: var(--ux-radius) var(--ux-radius) 0 0; }
+.app-view .card-title { color: var(--ux-text); font-weight: 680; }
+
+/* Botones: misma escala que Carga de archivos */
+.btn {
+  border-radius: var(--ux-radius-sm);
+  font-weight: 600;
+  min-height: 38px;
+  padding: .48rem .82rem;
+  transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease, border-color .15s ease;
+}
+.btn-sm { min-height: 34px; padding: .38rem .68rem; }
+.btn-lg { min-height: 46px; border-radius: .8rem; }
+.btn-primary { box-shadow: 0 .18rem .48rem rgba(13,110,253,.14); }
+.btn:hover:not(:disabled) { transform: translateY(-1px); }
+.btn:focus-visible { outline: 3px solid rgba(13,110,253,.18); outline-offset: 2px; }
+
+/* Formularios */
+.form-label { color: #39465a; font-weight: 620; font-size: .91rem; margin-bottom: .38rem; }
+.form-control, .form-select, .input-group-text {
+  min-height: 40px;
+  border-color: var(--ux-border-strong);
+  border-radius: var(--ux-radius-sm);
+  font-size: .95rem;
+}
+textarea.form-control { min-height: auto; }
+.form-control:focus, .form-select:focus {
+  border-color: rgba(13,110,253,.6);
+  box-shadow: 0 0 0 .22rem rgba(13,110,253,.10);
+}
+.form-text { color: var(--ux-muted); font-size: .82rem; }
+.input-group > .form-control:not(:first-child),
+.input-group > .form-select:not(:first-child),
+.input-group > .input-group-text:not(:first-child) { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.input-group > .form-control:not(:last-child),
+.input-group > .form-select:not(:last-child),
+.input-group > .input-group-text:not(:last-child) { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+
+/* Navegacion interna */
+.app-view .nav-tabs { border-bottom-color: var(--ux-border); gap: .25rem; }
+.app-view .nav-tabs .nav-link {
+  color: #596579;
+  border: 0;
+  border-radius: .7rem .7rem 0 0;
+  font-weight: 600;
+  padding: .68rem .9rem;
+}
+.app-view .nav-tabs .nav-link:hover { color: var(--ux-primary); background: var(--ux-surface-soft); }
+.app-view .nav-tabs .nav-link.active {
+  color: var(--ux-primary);
+  background: var(--ux-primary-soft);
+  box-shadow: inset 0 -2px 0 var(--ux-primary);
+}
+
+/* Acordeones */
+.app-view .accordion { --bs-accordion-border-color: var(--ux-border); }
+.app-view .accordion-item { overflow: hidden; margin-bottom: .65rem; }
+.app-view .accordion-button {
+  color: var(--ux-text);
+  background: var(--ux-surface);
+  font-weight: 650;
+  padding: .9rem 1rem;
+  box-shadow: none;
+}
+.app-view .accordion-button:not(.collapsed) { color: var(--ux-primary); background: var(--ux-primary-soft); }
+.app-view .accordion-body { padding: 1rem; }
+
+/* Tablas */
+.app-view .table-responsive, .modal .table-responsive {
+  border: 1px solid var(--ux-border);
+  border-radius: .82rem;
+}
+.app-view .table, .modal .table { margin-bottom: 0; font-size: .91rem; }
+.app-view .table thead th, .modal .table thead th {
+  color: #4b586b;
+  background: #f7f9fc;
+  border-bottom-color: var(--ux-border-strong);
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .025em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  white-space: nowrap;
+  padding: .72rem .75rem;
+}
+.app-view .table tbody td, .modal .table tbody td {
+  border-color: #edf0f4;
+  padding: .72rem .75rem;
+  vertical-align: middle;
+}
+.app-view .table-hover > tbody > tr:hover > * { background: #f8fbff; }
+
+/* Modales */
+.modal-content {
+  border: 1px solid var(--ux-border);
+  border-radius: 1rem;
+  box-shadow: 0 1rem 3rem rgba(15,23,42,.14);
+  overflow: hidden;
+}
+.modal-header, .modal-footer { background: var(--ux-surface); border-color: var(--ux-border); }
+.modal-title { color: var(--ux-text); font-weight: 700; }
+.modal-body { color: var(--ux-text); }
+
+/* Badges y alertas */
+.badge { border-radius: 999px; font-weight: 650; padding: .42em .65em; }
+.alert { border-radius: .82rem; border-width: 1px; }
+
+/* Dropdowns */
+.dropdown-menu {
+  border-radius: .82rem;
+  box-shadow: 0 .7rem 1.8rem rgba(15,23,42,.11);
+  padding: .4rem;
+}
+.dropdown-item { border-radius: .55rem; padding: .5rem .65rem; font-size: .92rem; }
+.dropdown-item:hover { background: var(--ux-primary-soft); color: var(--ux-primary); }
+
+/* Vistas especificas: Cuadros y Series / SQL */
+#tables .ts-crud-toolbar,
+#tables-update .card,
+#sql-create .card,
+#sql-update .card {
+  border-radius: var(--ux-radius) !important;
+  border-color: var(--ux-border) !important;
+  box-shadow: var(--ux-shadow);
+}
+#tables #previewDocument {
+  border-color: var(--ux-border) !important;
+  box-shadow: var(--ux-shadow);
+}
+#sql-create .ts-query-workspace,
+#sql-update .sql-update-shell { font-family: var(--ux-font); }
+
+/* Editor web: se elimina la mezcla de serifas para homologar el sistema */
+#editor .web-editor-page-title,
+#editor .editor-text h2,
+.web-editor-preview-document .preview-web-title,
+#webEditorPreviewModal .preview-web-title,
+#webEditorPreviewModal .editor-text h2 {
+  font-family: var(--ux-font) !important;
+}
+#editor .web-editor-toolbox,
+#editor .web-editor-properties,
+#editor .web-editor-stage {
+  border-color: var(--ux-border) !important;
+  border-radius: var(--ux-radius) !important;
+}
+#editor .web-editor-tool { border-radius: .65rem; }
+#editor .web-editor-tool:hover { background: var(--ux-primary-soft); }
+#editor .web-editor-stage { box-shadow: var(--ux-shadow); }
+
+/* Pantallas auxiliares y CRUD */
+#users .card, #bitacora .card, #reports .card, #home .card, #upload .card {
+  border-color: var(--ux-border);
+  border-radius: var(--ux-radius);
+  box-shadow: var(--ux-shadow);
+}
+
+/* Accesibilidad y densidad responsiva */
+@media (max-width: 767.98px) {
+  body { font-size: .96rem; }
+  .app-view .card-body { padding: .9rem; }
+  .app-view .table { font-size: .87rem; }
+  .btn { min-height: 40px; }
+  .form-control, .form-select { min-height: 42px; font-size: 1rem; }
+}

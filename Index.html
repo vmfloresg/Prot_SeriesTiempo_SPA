@@ -195,209 +195,145 @@
         </div>
     </div>
     <div id="panel-web-sections">
-<section id="section-upload" class="section active">
-                    <div class="card border-0 shadow-sm mb-3">
-                        <div class="card-body py-3">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <div>
+<section id="section-upload" class="section active panel-dashboard-upload">
+                    <div class="pw-dashboard-header mb-3">
+                        <div>
+                            <div class="pw-eyebrow"><i class="bi bi-cloud-arrow-up me-1"></i> Centro de procesamiento</div>
+                            <h4 class="mb-1">Dashboard de carga de archivos</h4>
+                            <p class="text-muted mb-0">Supervisa el periodo, el avance y las actualizaciones pendientes antes de procesar información.</p>
+                        </div>
+                        <div class="pw-header-status">
+                            <span class="pw-status-label">Estado de la carga</span>
+                            <span class="badge text-bg-info" id="badgeEstadoCarga">Pendiente</span>
+                        </div>
+                    </div>
 
-                                    <h6 class="mb-0">Resumen de procesamiento</h6>
-                                    <small class="text-muted">Periodo y estado de la carga.</small>
-
+                    <div class="row g-3 mb-3 pw-kpi-grid">
+                        <div class="col-12 col-sm-6 col-xl-3">
+                            <div class="pw-kpi-card pw-kpi-primary h-100">
+                                <div class="pw-kpi-icon"><i class="bi bi-calendar3"></i></div>
+                                <div class="pw-kpi-content">
+                                    <span class="pw-kpi-label">Periodo de trabajo</span>
+                                    <div class="pw-kpi-value pw-period-value" id="txtPeriodoActual">--</div>
+                                    <small>Periodo seleccionado para la carga</small>
                                 </div>
-
-                                <span class="badge text-bg-info" id="badgeEstadoCarga">Pendiente</span>
-                            </div>
-
-                            <div class="row g-2">
-                                <div class="col-12 col-md-4">
-                                    <div class="p-2 border rounded bg-light h-100">
-                                        <!-- <small class="text-muted d-block">Periodo</small> -->
-                                        <!-- <div class="fw-bold display-5" id="txtPeriodoActual">--</div>  -->
-                                        <!-- <div class="fw-bold display-5 text-primary mb-0" id="txtPeriodoActual">--</div> -->
-                                        <!-- <div class="d-inline-flex align-items-center fw-bold display-4 text-white bg-primary px-3 py-2 rounded-3 shadow-sm"
-                                            id="txtPeriodoActual">
-                                            --
-                                        </div> -->
-                                        <div
-                                            class="p-3 rounded-4 bg-primary bg-opacity-10 border border-primary border-opacity-25 shadow-sm h-100 d-flex flex-column justify-content-center">
-                                            <small class="text-uppercase text-primary fw-semibold mb-1">Periodo</small>
-                                            <div class="fw-bold display-4 text-primary lh-1 mb-0" id="txtPeriodoActual">
-                                                --</div>
-                                        
-                                        
-                                            </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-12 col-md-8">
-                                    <div class="card border-0 shadow-sm rounded-4 p-3 p-lg-4 bg-white h-100">
-
-                                        <div class="d-flex align-items-center justify-content-between mb-3">
-                                            <span
-                                                class="text-uppercase fs-7 fw-bold text-secondary tracking-wide">Resumen
-                                                previo</span>
-                                            <i class="bi bi-bar-chart-steps text-primary fs-5"></i>
-                                        </div>
-
-                                        <div class="row g-3">
-                                            <div class="col-12 col-lg-6">
-                                                <div
-                                                    class="p-3 border border-light-subtle rounded-3 bg-light-subtle shadow-xs h-100 transition-all">
-                                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                                        <span class="fw-bold text-dark d-flex align-items-center gap-2">
-                                                            <i class="bi bi-wallet2 text-primary"></i> Financiero
-                                                        </span>
-                                                        <span
-                                                            class="badge bg-primary bg-opacity-10 text-primary fw-semibold px-2 py-1 rounded-pill"
-                                                            id="badgeFinanzasPrevio">0%</span>
-                                                    </div>
-                                                    <div class="progress rounded-pill bg-200 mb-2" style="height: 8px;">
-                                                        <div class="progress-bar bg-primary rounded-pill"
-                                                            id="barraFinanzasPrevio" style="width: 0%"></div>
-                                                    </div>
-                                                    <small class="text-muted d-block" id="txtFinanzasPrevio">0 consultas
-                                                        · 0 cuadros</small>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-12 col-lg-6">
-                                                <div
-                                                    class="p-3 border border-light-subtle rounded-3 bg-light-subtle shadow-xs h-100 transition-all">
-                                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                                        <span class="fw-bold text-dark d-flex align-items-center gap-2">
-                                                            <i class="bi bi-gear-wide-connected text-success"></i>
-                                                            Operaciones
-                                                        </span>
-                                                        <span
-                                                            class="badge bg-success bg-opacity-10 text-success fw-semibold px-2 py-1 rounded-pill"
-                                                            id="badgeOperacionesPrevio">0%</span>
-                                                    </div>
-                                                    <div class="progress rounded-pill bg-200 mb-2" style="height: 8px;">
-                                                        <div class="progress-bar bg-success rounded-pill"
-                                                            id="barraOperacionesPrevio" style="width: 0%"></div>
-                                                    </div>
-                                                    <small class="text-muted d-block" id="txtOperacionesPrevio">0
-                                                        consultas · 0 cuadros</small>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="mt-4 pt-3 border-top">
-                                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                                <small class="text-secondary fw-semibold" id="txtUltimaCarga">Sin
-                                                    registros previos</small>
-                                            </div>
-                                            <div class="progress rounded-pill bg-light" style="height: 6px;">
-                                                <div class="progress-bar bg-dark rounded-pill" id="barraProgresoCarga"
-                                                    style="width: 0%"></div>
-                                            </div>
-                                        </div>
-
-                                        <div class="mt-4">
-                                            <small
-                                                class="text-uppercase fs-7 fw-bold text-secondary d-block mb-3 tracking-wide">Indicadores
-                                                de actualización pendiente</small>
-
-                                            <div id="botonesPendientesPorAnio" class="d-flex flex-wrap gap-2 mb-3">
-                                            </div>
-
-                                            <div id="panelMesesPendientes"
-                                                class="border border-light-subtle rounded-3 p-3 bg-light bg-opacity-50 d-none shadow-xs">
-                                                <div
-                                                    class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
-                                                    <span class="fw-bold text-dark d-flex align-items-center gap-2">
-                                                        <i class="bi bi-calendar-event text-warning"></i> Meses
-                                                        pendientes
-                                                    </span>
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <span id="anioPendienteActivo"
-                                                            class="badge rounded-pill bg-dark px-3 py-1">--</span>
-                                                        <button type="button" class="btn-close" aria-label="Cerrar"
-                                                            id="btnCerrarPanelMesesPendientes"></button>
-                                                    </div>
-                                                </div>
-                                                <div id="mesesPendientesActivos" class="d-flex flex-wrap gap-2">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                
-                                </div>
-
                             </div>
                         </div>
+                        <div class="col-12 col-sm-6 col-xl-3">
+                            <div class="pw-kpi-card h-100">
+                                <div class="pw-kpi-icon pw-kpi-icon-blue"><i class="bi bi-wallet2"></i></div>
+                                <div class="pw-kpi-content flex-grow-1">
+                                    <div class="d-flex align-items-center justify-content-between gap-2">
+                                        <span class="pw-kpi-label">Financiero</span>
+                                        <span class="pw-percent" id="badgeFinanzasPrevio">0%</span>
+                                    </div>
+                                    <div class="progress pw-kpi-progress"><div class="progress-bar" id="barraFinanzasPrevio" style="width: 0%"></div></div>
+                                    <small id="txtFinanzasPrevio">0 consultas · 0 cuadros</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-xl-3">
+                            <div class="pw-kpi-card h-100">
+                                <div class="pw-kpi-icon pw-kpi-icon-green"><i class="bi bi-gear-wide-connected"></i></div>
+                                <div class="pw-kpi-content flex-grow-1">
+                                    <div class="d-flex align-items-center justify-content-between gap-2">
+                                        <span class="pw-kpi-label">Operaciones</span>
+                                        <span class="pw-percent pw-percent-success" id="badgeOperacionesPrevio">0%</span>
+                                    </div>
+                                    <div class="progress pw-kpi-progress"><div class="progress-bar bg-success" id="barraOperacionesPrevio" style="width: 0%"></div></div>
+                                    <small id="txtOperacionesPrevio">0 consultas · 0 cuadros</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-xl-3">
+                            <div class="pw-kpi-card h-100">
+                                <div class="pw-kpi-icon pw-kpi-icon-dark"><i class="bi bi-clock-history"></i></div>
+                                <div class="pw-kpi-content flex-grow-1">
+                                    <span class="pw-kpi-label">Último procesamiento</span>
+                                    <div class="pw-last-load" id="txtUltimaCarga">Sin registros previos</div>
+                                    <div class="progress pw-kpi-progress mt-2"><div class="progress-bar bg-dark" id="barraProgresoCarga" style="width: 0%"></div></div>
+                                    <small>Avance general del proceso</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                        <div class="card card-modern">
-                            <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="pw-pending-notification mb-3">
+                        <button type="button"
+                                id="btnNotificacionPendientes"
+                                class="pw-notification-btn pw-notification-warning"
+                                aria-expanded="false"
+                                aria-controls="detalleNotificacionPendientes">
+                            <span class="pw-notification-icon"><i class="bi bi-bell-fill"></i></span>
+                            <span class="pw-notification-copy">
+                                <strong id="textoEstadoPendientes">Actualizaciones pendientes</strong>
+                                <small id="textoDetallePendientes">Hay actualizaciones que requieren atención.</small>
+                            </span>
+                            <span class="pw-notification-count" id="contadorPendientes">0</span>
+                            <i class="bi bi-chevron-down pw-notification-chevron" aria-hidden="true"></i>
+                        </button>
+
+                        <div id="detalleNotificacionPendientes" class="pw-pending-detail d-none" aria-hidden="true">
+                            <div class="d-flex align-items-center justify-content-between gap-3 mb-2">
                                 <div>
-                                    <h5 class="mb-0">Carga de archivos</h5>
-                                    <small class="text-muted">Selección de archivos y consulta a base de datos
-                                        SQL.</small>
+                                    <h6 class="mb-1">Detalle de actualizaciones</h6>
+                                    <small class="text-muted">Selecciona un año para consultar los meses que requieren actualización.</small>
+                                </div>
+                                <button type="button" class="btn-close" aria-label="Cerrar detalle" id="btnCerrarDetallePendientes"></button>
+                            </div>
+                            <div id="botonesPendientesPorAnio" class="d-flex flex-wrap gap-2 mt-3"></div>
+                            <div id="panelMesesPendientes" class="pw-months-panel d-none mt-3">
+                                <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+                                    <span class="fw-semibold"><i class="bi bi-calendar-event text-warning me-2"></i>Meses pendientes</span>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span id="anioPendienteActivo" class="badge rounded-pill bg-dark px-3 py-1">--</span>
+                                        <button type="button" class="btn-close" aria-label="Cerrar" id="btnCerrarPanelMesesPendientes"></button>
+                                    </div>
+                                </div>
+                                <div id="mesesPendientesActivos" class="d-flex flex-wrap gap-2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+<div class="card card-modern pw-workspace-card">
+                            <div class="card-header d-flex justify-content-between align-items-center pw-workspace-head">
+                                <div>
+                                    <h5 class="mb-1">Área de carga</h5>
+                                    <small class="text-muted">Carga archivos o ejecuta consultas SQL desde un mismo espacio de trabajo.</small>
                                 </div>
                             </div>
                             <div class="card-body">
                                 <ul class="nav nav-tabs" id="uploadTabs" role="tablist">
                                     <li class="nav-item" role="presentation">
                                         <button class="nav-link active" id="tab-files-tab" data-bs-toggle="tab"
-                                            data-bs-target="#tab-files" type="button" role="tab">Selección y carga de
-                                            archivos</button>
+                                            data-bs-target="#tab-files" type="button" role="tab"><i class="bi bi-file-earmark-arrow-up me-1"></i> Cargar archivos</button>
                                     </li>
                                     <li class="nav-item" role="presentation">
                                         <button class="nav-link" id="tab-sql-tab" data-bs-toggle="tab"
-                                            data-bs-target="#tab-sql" type="button" role="tab">Consultas SQL</button>
+                                            data-bs-target="#tab-sql" type="button" role="tab"><i class="bi bi-database me-1"></i> Consultas SQL</button>
                                     </li>
                                 </ul>
 
+                                <div class="pw-process-guide" aria-label="Flujo de carga de archivos">
+                                    <div class="pw-process-step is-active">
+                                        <span class="pw-step-number">1</span>
+                                        <span><strong>Selecciona</strong><small>Elige o arrastra tus archivos</small></span>
+                                    </div>
+                                    <div class="pw-process-line"></div>
+                                    <div class="pw-process-step">
+                                        <span class="pw-step-number">2</span>
+                                        <span><strong>Revisa</strong><small>Confirma los archivos seleccionados</small></span>
+                                    </div>
+                                    <div class="pw-process-line"></div>
+                                    <div class="pw-process-step">
+                                        <span class="pw-step-number">3</span>
+                                        <span><strong>Precarga</strong><small>Valida antes de procesar</small></span>
+                                    </div>
+                                </div>
+
                                 <div class="tab-content tab-container" id="uploadTabsContent">
                                     <div class="tab-pane fade show active" id="tab-files" role="tabpanel">
-                                        <div class="row mt-3">
-                                            <div class="col-12 col-lg-6 mb-3">
-                                                <h6 class="mb-2">Seleccionar archivos</h6>
-                                                <p class="text-muted mb-3">Puedes seleccionar archivos desde el
-                                                    explorador o
-                                                    arrastrarlos directamente sobre el área de carga.</p>
-
-                                                <div class="mb-4">
-                                                    <label class="form-label fw-bold text-dark mb-2">Seleccionar
-                                                        archivos:</label>
-
-                                                    <div class="card border-2 border-dashed rounded-4 p-4 text-center bg-light position-relative hover-shadow transition-all"
-                                                        style="border-style: dashed !important; border-color: #cbd5e1 !important; cursor: pointer;"
-                                                        onclick="document.getElementById('fileInput').click();">
-
-                                                        <input type="file" id="fileInput" class="d-none" multiple />
-
-                                                        <div class="card-body p-2">
-                                                            <div class="mb-3">
-                                                                <div class="d-inline-flex align-items-center justify-content-center bg-white text-primary rounded-circle shadow-sm"
-                                                                    style="width: 56px; height: 56px;">
-                                                                    <i class="bi bi-cloud-arrow-up fs-3"></i>
-                                                                </div>
-                                                            </div>
-                                                            <h6 class="fw-bold text-dark mb-1">Arrastra y suelta tus
-                                                                archivos aquí</h6>
-                                                            <p class="text-muted small mb-3">o haz clic para explorar en
-                                                                tu equipo (puedes seleccionar varios)</p>
-                                                            <span
-                                                                class="badge bg-white text-secondary border px-3 py-2 rounded-pill shadow-xs fw-normal">
-                                                                <i class="bi bi-files me-1 text-primary"></i> Soporta
-                                                                selección múltiple
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <!-- 
-                                                <div class="mb-3">
-                                                    <label class="form-label">Seleccionar archivos:</label>
-                                                    <input type="file" id="fileInput" class="form-control" multiple />
-                                                </div> -->
-
-                                                <button id="btnUpload" class="btn btn-primary w-100 mb-3"
-                                                    type="button">Precarga</button>
-
-                                                <div id="resumenCargaArchivos"
+<div id="resumenCargaArchivos"
                                                     class="row row-cols-1 row-cols-md-3 g-3 mt-3 d-none">
                                                     <div class="col">
                                                         <div class="card card-resumen resumen-card h-100"
@@ -441,6 +377,56 @@
                                                     </div>
                                                 </div>
 
+                                        <div class="row g-3 mt-2 pw-upload-grid">
+                                            <div class="col-12 col-lg-6 mb-3 pw-upload-source">
+                                                <div class="pw-section-kicker">PASO 1</div>
+                                                <h6 class="mb-2">Selecciona desde tu equipo</h6>
+                                                <p class="text-muted mb-3">Puedes seleccionar archivos desde el
+                                                    explorador o
+                                                    arrastrarlos directamente sobre el área de carga.</p>
+
+                                                <div class="mb-4">
+                                                    <label class="form-label fw-bold text-dark mb-2">Seleccionar
+                                                        archivos:</label>
+
+                                                    <div class="card border-2 border-dashed rounded-4 p-4 text-center bg-light position-relative hover-shadow transition-all"
+                                                        style="border-style: dashed !important; border-color: #cbd5e1 !important; cursor: pointer;"
+                                                        onclick="document.getElementById('fileInput').click();">
+
+                                                        <input type="file" id="fileInput" class="d-none" multiple />
+
+                                                        <div class="card-body p-2">
+                                                            <div class="mb-3">
+                                                                <div class="d-inline-flex align-items-center justify-content-center bg-white text-primary rounded-circle shadow-sm"
+                                                                    style="width: 56px; height: 56px;">
+                                                                    <i class="bi bi-cloud-arrow-up fs-3"></i>
+                                                                </div>
+                                                            </div>
+                                                            <h6 class="fw-bold text-dark mb-1">Arrastra y suelta tus
+                                                                archivos aquí</h6>
+                                                            <p class="text-muted small mb-3">o haz clic para explorar en
+                                                                tu equipo (puedes seleccionar varios)</p>
+                                                            <span
+                                                                class="badge bg-white text-secondary border px-3 py-2 rounded-pill shadow-xs fw-normal">
+                                                                <i class="bi bi-files me-1 text-primary"></i> Soporta
+                                                                selección múltiple
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- 
+                                                <div class="mb-3">
+                                                    <label class="form-label">Seleccionar archivos:</label>
+                                                    <input type="file" id="fileInput" class="form-control" multiple />
+                                                </div> -->
+
+                                                <div class="pw-action-hint mb-2"><i class="bi bi-info-circle me-1"></i>La precarga valida la información antes de enviarla al procesamiento final.</div>
+
+                                                <button id="btnUpload" class="btn btn-primary w-100 mb-3 pw-primary-action"
+                                                    type="button"><i class="bi bi-shield-check me-2"></i>Iniciar precarga</button>
+
+                                                
+
                                                 <div id="uploadSummary" class="alert alert-info d-none mt-3"
                                                     role="alert">
                                                     <strong>Resumen de carga:</strong>
@@ -449,10 +435,10 @@
 
                                             </div>
 
-                                            <div class="col-12 col-lg-6 mb-3">
-                                                <h6 class="mb-2">Arrastrar y soltar (Drag & Drop)</h6>
-                                                <p class="text-muted mb-3">Arrastra uno o varios archivos sobre el área
-                                                    inferior para agregarlos a la lista de carga.</p>
+                                            <div class="col-12 col-lg-6 mb-3 pw-upload-drop">
+                                                <div class="pw-section-kicker">PASO 2</div>
+                                                <h6 class="mb-2">Revisa o agrega más archivos</h6>
+                                                <p class="text-muted mb-3">Arrastra archivos adicionales o revisa aquí la lista antes de iniciar la precarga.</p>
                                                 <div id="dropArea" class="drop-area">
                                                     <p class="mb-1 fw-semibold">Arrastra aquí tus archivos</p>
                                                     <small class="text-muted">Se agregarán a la lista de archivos
@@ -1148,6 +1134,24 @@
     </div>
   </div>
 </div>
+
+<div class="ts-create-flow" aria-label="Flujo de creación de cuadros y series">
+  <div class="ts-flow-item is-active">
+    <span class="ts-flow-icon"><i class="bi bi-sliders"></i></span>
+    <span><strong>1. Configura</strong><small>Define estructura y contenido</small></span>
+  </div>
+  <span class="ts-flow-line" aria-hidden="true"></span>
+  <div class="ts-flow-item">
+    <span class="ts-flow-icon"><i class="bi bi-eye"></i></span>
+    <span><strong>2. Revisa</strong><small>Valida la previsualización</small></span>
+  </div>
+  <span class="ts-flow-line" aria-hidden="true"></span>
+  <div class="ts-flow-item">
+    <span class="ts-flow-icon"><i class="bi bi-check2-circle"></i></span>
+    <span><strong>3. Finaliza</strong><small>Guarda o genera plantilla</small></span>
+  </div>
+</div>
+
 <div id="tsModoCuadros">
 <div class="row g-0 workspace">
             <!-- ================================================= -->
@@ -1253,7 +1257,7 @@
                                         <option value="Semestral"> Semestral </option>
                                         <option value="Anual"> Anual </option>
                                     </select> </div> <!-- PERIODO DISPONIBLE -->
-                                <div class="mb-3"> <label class="form-label"> Periodo disponible </label>
+                                <div class="mb-3"> <label class="form-label"> Periodo requerido </label>
                                     <div class="row g-2">
                                         <div class="col-6"> <input
                                                 type="month" id="availablePeriodStart" class="form-control"> </div>
@@ -1618,14 +1622,94 @@
                     </div>
 
 
+
+
                     <!-- ================================================= -->
-                    <!-- 4. NOTAS -->
+                    <!-- 4. VINCULACION CON CUADROS CONSUMIDORES -->
+                    <!-- ================================================= -->
+                    <div class="accordion-item ts-link-accordion">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#sectionLinks">
+                                <span class="section-number">4</span>
+                                <span>
+                                    <strong>Vincular series con cuadros</strong>
+                                    <small>Define qué cuadros consumen cada serie de tiempo</small>
+                                </span>
+                                <span class="badge rounded-pill text-bg-primary ms-auto me-3" id="tsVinculosContador">0</span>
+                            </button>
+                        </h2>
+                        <div id="sectionLinks" class="accordion-collapse collapse" data-bs-parent="#configurationAccordion">
+                            <div class="accordion-body">
+                                <div class="ts-link-intro mb-3">
+                                    <span class="ts-link-intro-icon"><i class="bi bi-diagram-2"></i></span>
+                                    <div>
+                                        <strong>Serie de tiempo → Cuadro consumidor</strong>
+                                        <p class="mb-0">Selecciona una serie del cuadro actual y después marca uno o varios cuadros que utilizarán esa información.</p>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="tsVinculoSerie" class="form-label">Serie de tiempo origen</label>
+                                    <select id="tsVinculoSerie" class="form-select" onchange="ts_vinculosRenderCuadros()">
+                                        <option value="">Seleccione una serie de tiempo...</option>
+                                    </select>
+                                    <div class="form-text">El catálogo se genera con las series configuradas en el paso anterior.</div>
+                                </div>
+                                <div class="mb-3 ts-link-browser">
+                                    <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                                        <label class="form-label mb-0">Cuadros consumidores</label>
+                                        <span class="badge rounded-pill text-bg-light border" id="tsVinculoSeleccionados">0 seleccionados</span>
+                                    </div>
+
+                                    <div class="ts-link-browser-tools">
+                                        <div class="input-group input-group-sm ts-link-search">
+                                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                            <input type="search" id="tsVinculoBuscarCuadro" class="form-control"
+                                                placeholder="Buscar por nombre, clave o periodicidad..."
+                                                aria-label="Buscar cuadros consumidores"
+                                                oninput="ts_vinculosAplicarFiltros()">
+                                        </div>
+                                        <label class="ts-link-selected-filter">
+                                            <input type="checkbox" class="form-check-input" id="tsVinculoSoloSeleccionados"
+                                                onchange="ts_vinculosAplicarFiltros()">
+                                            <span>Ver sólo seleccionados</span>
+                                        </label>
+                                    </div>
+
+                                    <div class="ts-link-list-actions">
+                                        <span id="tsVinculoResultados" class="text-muted">0 cuadros</span>
+                                        <div class="d-flex gap-1">
+                                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="ts_vinculosSeleccionarPagina(true)">
+                                                <i class="bi bi-check2-square me-1"></i>Seleccionar página
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="ts_vinculosSeleccionarPagina(false)">
+                                                <i class="bi bi-square me-1"></i>Limpiar página
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div id="tsVinculoCuadrosLista" class="ts-link-consumers">
+                                        <div class="ts-link-empty"><i class="bi bi-arrow-up-circle me-2"></i>Selecciona primero una serie de tiempo.</div>
+                                    </div>
+                                    <div id="tsVinculoPaginacion" class="ts-link-pagination d-none"></div>
+                                </div>
+                                <div class="ts-link-summary-card">
+                                    <div class="ts-link-summary-header"><i class="bi bi-share me-2"></i>Mapa de consumo configurado</div>
+                                    <div id="tsVinculosResumen">
+                                        <div class="ts-link-empty"><i class="bi bi-link-45deg me-2"></i>Aún no hay vínculos configurados.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================================================= -->
+                    <!-- 5. NOTAS -->
                     <!-- ================================================= -->
 
                     <div class="accordion-item">
                         <h2 class="accordion-header"> <button class="accordion-button collapsed" type="button"
-                                data-bs-toggle="collapse" data-bs-target="#sectionNotes"> <span
-                                    class="section-number">4</span> <span> <strong>Notas y fuentes</strong>
+                                data-bs-toggle="collapse" data-bs-target="#sectionNotes"> <span class="section-number">5</span> <span> <strong>Notas y fuentes</strong>
                                     <small>Información complementaria</small> </span> </button> </h2>
                         <div id="sectionNotes" class="accordion-collapse collapse"
                             data-bs-parent="#configurationAccordion">
@@ -1737,86 +1821,121 @@
 
 
                     <!-- Consultas SQL - Crear -->
-<div id="sql-create" class="app-view d-none">
-<div id="tsModoConsulta" class="ts-query-workspace">
-  <div class="row g-4">
-    <div class="col-lg-5">
-      <div class="card border-0 shadow-sm h-100">
-        <div class="card-header bg-white border-bottom py-3">
-          <div class="d-flex align-items-center gap-2">
-            <span class="ts-query-step">1</span>
-            <div>
-              <h6 class="mb-0">Conexión a base de datos</h6>
-              <small class="text-muted">Configure los parámetros de conexión.</small>
+<div id="sql-create" class="app-view d-none sql-create-workspace">
+  <div class="sql-create-hero mb-3">
+    <div class="sql-create-hero-copy">
+      <div class="sql-create-eyebrow"><i class="bi bi-database-add me-1"></i> Consultas SQL</div>
+      <h4 class="mb-1">Crear consulta</h4>
+      <p class="mb-0">Configura la conexión, valida el acceso y construye la consulta antes de guardarla.</p>
+    </div>
+    <div class="sql-create-status">
+      <span class="sql-create-status-label">Estado</span>
+      <span id="tsSqlEstadoConexion" class="badge text-bg-secondary">Sin conexión</span>
+    </div>
+  </div>
+
+  <div class="sql-create-steps mb-3" aria-label="Flujo para crear una consulta SQL">
+    <div class="sql-create-step is-active"><span>1</span><div><strong>Configura</strong><small>Datos de conexión</small></div></div>
+    <div class="sql-create-step"><span>2</span><div><strong>Valida</strong><small>Prueba la conexión</small></div></div>
+    <div class="sql-create-step"><span>3</span><div><strong>Consulta</strong><small>Escribe y revisa SQL</small></div></div>
+    <div class="sql-create-step"><span>4</span><div><strong>Guarda</strong><small>Registra la consulta</small></div></div>
+  </div>
+
+  <div id="tsModoConsulta" class="ts-query-workspace">
+    <div class="row g-3 sql-create-grid">
+      <div class="col-xl-5 col-lg-6">
+        <div class="card border-0 shadow-sm h-100 sql-create-card">
+          <div class="card-header sql-create-card-head">
+            <div class="d-flex align-items-center gap-3">
+              <span class="ts-query-step">1</span>
+              <div>
+                <h6 class="mb-1">Conexión a base de datos</h6>
+                <small>Ingresa los parámetros necesarios para establecer la conexión.</small>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="card-body">
-          <div class="row g-3">
-            <div class="col-12">
-              <label class="form-label">Nombre de la conexión</label>
-              <input id="tsSqlNombreConexion" class="form-control" placeholder="Ej. Estadísticas producción">
+          <div class="card-body sql-create-form-body">
+            <div class="sql-create-section-label">Identificación</div>
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label" for="tsSqlNombreConexion">Nombre de la conexión</label>
+                <input id="tsSqlNombreConexion" class="form-control" placeholder="Ej. Estadísticas producción">
+                <div class="form-text">Usa un nombre fácil de reconocer posteriormente.</div>
+              </div>
             </div>
-            <div class="col-md-7">
-              <label class="form-label">Motor de base de datos</label>
-              <select id="tsSqlMotor" class="form-select">
-                <option value="sqlserver">SQL Server</option>
-                <option value="postgresql">PostgreSQL</option>
-                <option value="mysql">MySQL</option>
-                <option value="oracle">Oracle</option>
-              </select>
+
+            <div class="sql-create-section-label mt-4">Servidor</div>
+            <div class="row g-3">
+              <div class="col-md-7">
+                <label class="form-label" for="tsSqlMotor">Motor de base de datos</label>
+                <select id="tsSqlMotor" class="form-select">
+                  <option value="sqlserver">SQL Server</option>
+                  <option value="postgresql">PostgreSQL</option>
+                  <option value="mysql">MySQL</option>
+                  <option value="oracle">Oracle</option>
+                </select>
+              </div>
+              <div class="col-md-5">
+                <label class="form-label" for="tsSqlPuerto">Puerto</label>
+                <input id="tsSqlPuerto" class="form-control" value="1433" inputmode="numeric">
+              </div>
+              <div class="col-md-7">
+                <label class="form-label" for="tsSqlServidor">Servidor / Host</label>
+                <input id="tsSqlServidor" class="form-control" placeholder="servidor.dominio.local">
+              </div>
+              <div class="col-md-5">
+                <label class="form-label" for="tsSqlBase">Base de datos</label>
+                <input id="tsSqlBase" class="form-control" placeholder="BaseEstadistica">
+              </div>
             </div>
-            <div class="col-md-5">
-              <label class="form-label">Puerto</label>
-              <input id="tsSqlPuerto" class="form-control" value="1433" inputmode="numeric">
+
+            <div class="sql-create-section-label mt-4">Credenciales</div>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label" for="tsSqlUsuario">Usuario</label>
+                <input id="tsSqlUsuario" class="form-control" autocomplete="username" placeholder="usuario">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="tsSqlPassword">Contraseña</label>
+                <input id="tsSqlPassword" type="password" class="form-control" autocomplete="current-password" placeholder="••••••••">
+              </div>
             </div>
-            <div class="col-md-7">
-              <label class="form-label">Servidor / Host</label>
-              <input id="tsSqlServidor" class="form-control" placeholder="servidor.dominio.local">
+
+            <div class="sql-create-connection-actions mt-4">
+              <button class="btn btn-primary" type="button" onclick="ts_sqlProbarConexion()">
+                <i class="bi bi-plug me-1"></i> Probar conexión
+              </button>
+              <small class="text-muted"><i class="bi bi-shield-lock me-1"></i>Las credenciales se usan solo para validar la configuración del prototipo.</small>
             </div>
-            <div class="col-md-5">
-              <label class="form-label">Base de datos</label>
-              <input id="tsSqlBase" class="form-control" placeholder="BaseEstadistica">
+            <div class="alert alert-light border mt-3 mb-0 sql-create-info">
+              <i class="bi bi-info-circle me-2"></i>
+              <span>La prueba actual valida la configuración en el navegador. La conexión real deberá realizarse mediante una API segura del servidor.</span>
             </div>
-            <div class="col-md-6">
-              <label class="form-label">Usuario</label>
-              <input id="tsSqlUsuario" class="form-control" autocomplete="username" placeholder="usuario">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Contraseña</label>
-              <input id="tsSqlPassword" type="password" class="form-control" autocomplete="current-password" placeholder="••••••••">
-            </div>
-          </div>
-          <div class="d-flex flex-wrap align-items-center gap-2 mt-4">
-            <button class="btn btn-primary" type="button" onclick="ts_sqlProbarConexion()">
-              <i class="bi bi-plug me-1"></i> Probar conexión
-            </button>
-            <span id="tsSqlEstadoConexion" class="badge text-bg-secondary">Sin conexión</span>
-          </div>
-          <div class="alert alert-light border mt-3 mb-0 small text-muted">
-            <i class="bi bi-info-circle me-1"></i> En este prototipo la prueba de conexión valida la configuración en el navegador. La conexión real deberá realizarse posteriormente mediante una API segura del servidor.
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="col-lg-7">
-      <div class="card border-0 shadow-sm h-100">
-        <div class="card-header bg-white border-bottom py-3">
-          <div class="d-flex align-items-center gap-2">
-            <span class="ts-query-step">2</span>
-            <div>
-              <h6 class="mb-0">Consulta SQL</h6>
-              <small class="text-muted">Escriba la consulta después de validar la conexión.</small>
+      <div class="col-xl-7 col-lg-6">
+        <div class="card border-0 shadow-sm h-100 sql-create-card sql-create-editor-card">
+          <div class="card-header sql-create-card-head">
+            <div class="d-flex align-items-center gap-3">
+              <span class="ts-query-step">2</span>
+              <div>
+                <h6 class="mb-1">Consulta SQL</h6>
+                <small>Escribe la sentencia una vez validada la conexión y revisa los registros antes de guardar.</small>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="card-body d-flex flex-column">
-          <label class="form-label" for="tsSqlConsulta">Consulta</label>
-          <textarea id="tsSqlConsulta" class="form-control font-monospace ts-query-editor" rows="15" disabled placeholder="SELECT ... FROM ... WHERE ..."></textarea>
-          <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3">
-            <small id="tsSqlAyuda" class="text-muted">Primero establezca la conexión.</small>
-            <div class="d-flex flex-wrap gap-2">
+          <div class="card-body d-flex flex-column sql-create-editor-body">
+            <div class="sql-create-editor-toolbar">
+              <label class="form-label mb-0" for="tsSqlConsulta">Editor SQL</label>
+              <span class="sql-create-code-hint"><i class="bi bi-code-slash me-1"></i>SQL</span>
+            </div>
+            <textarea id="tsSqlConsulta" class="form-control font-monospace ts-query-editor" rows="15" disabled placeholder="SELECT ... FROM ... WHERE ..."></textarea>
+            <div class="sql-create-help-row mt-3">
+              <small id="tsSqlAyuda" class="text-muted"><i class="bi bi-info-circle me-1"></i>Primero establezca la conexión.</small>
+            </div>
+            <div class="sql-create-editor-actions mt-auto pt-3">
               <button id="tsSqlVerRegistrosBtn" class="btn btn-outline-primary" type="button" disabled onclick="ts_sqlVerRegistros()">
                 <i class="bi bi-table me-1"></i> Ver registros
               </button>
@@ -1830,82 +1949,124 @@
     </div>
   </div>
 </div>
-</div>
 
                     <!-- Actualización de cuadros y series -->
-                    <div id="tables-update" class="app-view d-none">
-                        <div class="card border-0 shadow-sm mb-3">
-                            <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
-                                <div>
-                                    <h5 class="mb-1"><i class="bi bi-arrow-repeat me-2"></i>Actualizar cuadros y series</h5>
-                                    <p class="text-muted mb-0">Seleccione un cuadro registrado para cargarlo en el constructor y modificar su configuración.</p>
-                                </div>
-                                <button type="button" id="tsCrudActualizarPaginaBtn" class="btn btn-primary" disabled onclick="ts_crudActualizarDesdePagina()">
-                                    <i class="bi bi-pencil-square me-1"></i> Actualizar seleccionado
-                                </button>
+                    <div id="tables-update" class="app-view d-none ts-update-workspace">
+                        <div class="ts-update-hero mb-3">
+                            <div class="ts-update-hero-copy">
+                                <div class="ts-update-eyebrow"><i class="bi bi-arrow-repeat me-1"></i> Gestión de cuadros y series</div>
+                                <h4 class="mb-1">Actualizar cuadros y series</h4>
+                                <p class="mb-0">Localiza un registro, selecciónalo y abre su configuración para realizar cambios de forma segura.</p>
                             </div>
+                            <button type="button" id="tsCrudActualizarPaginaBtn" class="btn btn-primary ts-update-main-action" disabled onclick="ts_crudActualizarDesdePagina()">
+                                <i class="bi bi-pencil-square me-1"></i> Actualizar seleccionado
+                            </button>
                         </div>
-                        <div class="card border-0 shadow-sm">
+
+                        <div class="ts-update-steps mb-3" aria-label="Flujo de actualización">
+                            <div class="ts-update-step is-active"><span>1</span><div><strong>Buscar</strong><small>Localiza el cuadro</small></div></div>
+                            <div class="ts-update-step"><span>2</span><div><strong>Seleccionar</strong><small>Elige un registro</small></div></div>
+                            <div class="ts-update-step"><span>3</span><div><strong>Actualizar</strong><small>Edita y guarda</small></div></div>
+                        </div>
+
+                        <div class="card border-0 shadow-sm ts-update-list-card">
                             <div class="card-body">
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
-                                    <input type="search" id="tsCrudBuscarPagina" class="form-control" placeholder="Buscar por clave, título o periodicidad..." oninput="ts_crudRenderizarPaginaActualizacion()">
+                                <div class="ts-update-toolbar">
+                                    <div>
+                                        <h6 class="mb-1"><i class="bi bi-table me-2"></i>Cuadros registrados</h6>
+                                        <small class="text-muted">Haz clic sobre una fila para seleccionarla. Puedes buscar por clave, título o periodicidad.</small>
+                                    </div>
+                                    <div class="input-group ts-update-search">
+                                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                        <input type="search" id="tsCrudBuscarPagina" class="form-control" placeholder="Buscar cuadros..." aria-label="Buscar cuadros registrados" oninput="ts_crudRenderizarPaginaActualizacion()">
+                                    </div>
                                 </div>
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle ts-crud-table">
+                                <div class="table-responsive ts-update-table-wrap">
+                                    <table class="table table-hover align-middle ts-crud-table mb-0">
                                         <thead>
                                             <tr>
                                                 <th style="width:120px">Clave</th>
                                                 <th>Título del cuadro</th>
                                                 <th style="width:160px">Periodicidad</th>
-                                                <th style="width:190px">Fecha de actualización</th>
-                                                <th class="text-end" style="width:160px">Acciones</th>
+                                                <th class="text-center" style="width:105px">Vínculos</th>
+                                                <th style="width:190px">Última actualización</th>
+                                                <th class="text-end" style="width:160px">Estado / Acción</th>
                                             </tr>
                                         </thead>
                                         <tbody id="tsCrudRegistrosPaginaBody"></tbody>
                                     </table>
                                 </div>
-                                <div id="tsCrudSinRegistrosPagina" class="text-center text-muted py-5 d-none">
-                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                    No existen cuadros registrados.
+                                <div id="tsCrudSinRegistrosPagina" class="ts-update-empty text-center text-muted py-5 d-none">
+                                    <span class="ts-update-empty-icon"><i class="bi bi-inbox"></i></span>
+                                    <strong class="d-block mt-2">No existen cuadros registrados</strong>
+                                    <small>Cuando existan registros disponibles aparecerán en esta sección.</small>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Consultas SQL - Actualizar -->
-                    <div id="sql-update" class="app-view d-none">
-                        <div class="card border-0 shadow-sm mb-3">
-                            <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
-                                <div>
-                                    <h5 class="mb-1"><i class="bi bi-database-gear me-2"></i>Actualizar consultas SQL</h5>
-                                    <p class="text-muted mb-0">Seleccione una consulta para abrir la misma ventana de edición disponible en Carga de archivos.</p>
-                                </div>
+                    <div id="sql-update" class="app-view d-none sql-update-workspace">
+                        <div class="sql-update-hero mb-3">
+                            <div>
+                                <div class="sql-update-eyebrow"><i class="bi bi-database-gear me-1"></i> Administración de consultas</div>
+                                <h4 class="mb-1">Actualizar consultas SQL</h4>
+                                <p class="mb-0">Busca una consulta, selecciónala para editarla o cambia su disponibilidad desde la misma lista.</p>
+                            </div>
+                            <div class="sql-update-hero-icon" aria-hidden="true"><i class="bi bi-pencil-square"></i></div>
+                        </div>
+
+                        <div class="sql-update-steps mb-3" aria-label="Flujo de actualización de consultas">
+                            <div class="sql-update-step is-active">
+                                <span>1</span>
+                                <div><strong>Buscar</strong><small>Localiza la consulta</small></div>
+                            </div>
+                            <div class="sql-update-step">
+                                <span>2</span>
+                                <div><strong>Seleccionar</strong><small>Haz clic sobre una fila</small></div>
+                            </div>
+                            <div class="sql-update-step">
+                                <span>3</span>
+                                <div><strong>Editar</strong><small>Actualiza y guarda</small></div>
                             </div>
                         </div>
-                        <div class="card border-0 shadow-sm">
+
+                        <div class="card border-0 shadow-sm sql-update-list-card">
                             <div class="card-body">
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
-                                    <input type="search" id="sqlUpdateBuscar" class="form-control" placeholder="Buscar por nombre de consulta...">
+                                <div class="sql-update-toolbar">
+                                    <div>
+                                        <h6 class="mb-1"><i class="bi bi-list-ul me-2"></i>Consultas registradas</h6>
+                                        <small class="text-muted">Selecciona una fila para abrir la edición. Usa la acción lateral para habilitar o deshabilitar.</small>
+                                    </div>
+                                    <div class="input-group sql-update-search">
+                                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                        <input type="search" id="sqlUpdateBuscar" class="form-control" placeholder="Buscar consulta..." aria-label="Buscar consulta SQL">
+                                    </div>
                                 </div>
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle ts-crud-table">
+
+                                <div class="sql-update-tip">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <span>La edición se abre con la misma configuración y controles disponibles en Carga de archivos.</span>
+                                </div>
+
+                                <div class="table-responsive sql-update-table-wrap">
+                                    <table class="table table-hover align-middle ts-crud-table mb-0">
                                         <thead>
                                             <tr>
                                                 <th>Nombre de la consulta</th>
-                                                <th style="width:230px">Fecha de última actualización</th>
-                                                <th class="text-end" style="width:170px">Acción</th>
+                                                <th style="width:230px">Última actualización</th>
+                                                <th class="text-end" style="width:170px">Estado / Acción</th>
                                             </tr>
                                         </thead>
                                         <tbody id="sqlUpdateBody"></tbody>
                                     </table>
                                 </div>
-                                <div id="sqlUpdateEmpty" class="text-center text-muted py-5 d-none">
-                                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                    No existen consultas registradas.
+
+                                <div id="sqlUpdateEmpty" class="sql-update-empty text-center text-muted py-5 d-none">
+                                    <span class="sql-update-empty-icon"><i class="bi bi-database-x"></i></span>
+                                    <strong class="d-block mt-2">No existen consultas registradas</strong>
+                                    <small>Cuando existan consultas disponibles aparecerán en esta sección.</small>
                                 </div>
-                                <div class="small text-muted mt-2">Haga clic en una fila para editar la consulta.</div>
                             </div>
                         </div>
                     </div>
@@ -2732,33 +2893,59 @@
 <!-- Modal: editor seguro de Series de datos -->
 <div class="modal fade" id="tsDataEditorModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div>
-          <h5 class="modal-title mb-1"><i class="bi bi-grid-3x3-gap me-2"></i>Edición segura de Series de datos</h5>
-          <div class="small text-muted">Modifique AFORE, columnas y valores sobre una copia temporal. Los cambios se aplican únicamente al guardar.</div>
+    <div class="modal-content ts-safe-editor-modal">
+      <div class="modal-header ts-safe-editor-header">
+        <div class="d-flex align-items-start gap-3">
+          <div class="ts-safe-editor-header-icon" aria-hidden="true"><i class="bi bi-shield-check"></i></div>
+          <div>
+            <div class="ts-safe-editor-eyebrow">Editor protegido de información</div>
+            <h5 class="modal-title mb-1">Edición segura de Series de tiempo</h5>
+            <div class="small text-muted">Trabaja sobre una copia temporal. Nada se aplica al cuadro hasta seleccionar <strong>Guardar cambios</strong>.</div>
+          </div>
         </div>
         <button type="button" class="btn-close" aria-label="Cerrar" onclick="ts_editorDatosCancelar()"></button>
       </div>
       <div class="modal-body">
         <div id="tsDataEditor">
-          <div class="ts-data-editor-toolbar d-flex flex-wrap align-items-center gap-2 mb-3">
-            <button type="button" class="btn btn-sm btn-outline-primary" onclick="ts_editorDatosMostrarAgregarAfore()"><i class="bi bi-person-plus me-1"></i>Agregar AFORE</button>
-            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="ts_editorDatosAgregarColumna()"><i class="bi bi-layout-three-columns me-1"></i>Agregar columna</button>
-            <button type="button" id="tsDataUndoBtn" class="btn btn-sm btn-outline-secondary" onclick="ts_editorDatosDeshacer()"><i class="bi bi-arrow-counterclockwise me-1"></i>Deshacer</button>
-            <button type="button" id="tsDataRedoBtn" class="btn btn-sm btn-outline-secondary" onclick="ts_editorDatosRehacer()"><i class="bi bi-arrow-clockwise me-1"></i>Rehacer</button>
-            <span class="badge text-bg-warning-subtle text-warning-emphasis ms-lg-auto" id="tsDataPendingBadge">0 cambios pendientes</span>
+          <div class="ts-data-editor-summary mb-3">
+            <div class="ts-data-editor-summary-item">
+              <span class="ts-summary-icon"><i class="bi bi-currency-dollar"></i></span>
+              <div><strong>Valores monetarios</strong><small>Las cifras se muestran en MXN con formato $1,234.56</small></div>
+            </div>
+            <div class="ts-data-editor-summary-item">
+              <span class="ts-summary-icon"><i class="bi bi-clock-history"></i></span>
+              <div><strong>Edición reversible</strong><small>Utiliza Deshacer y Rehacer antes de guardar</small></div>
+            </div>
+            <div class="ts-data-editor-summary-item">
+              <span class="ts-summary-icon"><i class="bi bi-cloud-check"></i></span>
+              <div><strong>Guardado controlado</strong><small>Los cambios se confirman al final del proceso</small></div>
+            </div>
           </div>
-          <div id="tsDataAddAforePanel" class="card border-primary-subtle bg-body-tertiary mb-3 d-none">
+
+          <div class="ts-data-editor-toolbar mb-3">
+            <div class="ts-data-editor-toolbar-group">
+              <span class="ts-toolbar-label">Estructura</span>
+              <button type="button" class="btn btn-sm btn-outline-primary" onclick="ts_editorDatosMostrarAgregarAfore()"><i class="bi bi-person-plus me-1"></i>Agregar AFORE</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" onclick="ts_editorDatosAgregarColumna()"><i class="bi bi-layout-three-columns me-1"></i>Agregar columna</button>
+            </div>
+            <div class="ts-data-editor-toolbar-group">
+              <span class="ts-toolbar-label">Historial</span>
+              <button type="button" id="tsDataUndoBtn" class="btn btn-sm btn-outline-secondary" onclick="ts_editorDatosDeshacer()"><i class="bi bi-arrow-counterclockwise me-1"></i>Deshacer</button>
+              <button type="button" id="tsDataRedoBtn" class="btn btn-sm btn-outline-secondary" onclick="ts_editorDatosRehacer()"><i class="bi bi-arrow-clockwise me-1"></i>Rehacer</button>
+            </div>
+            <span class="badge text-bg-warning-subtle text-warning-emphasis ts-data-pending-badge" id="tsDataPendingBadge">0 cambios pendientes</span>
+          </div>
+
+          <div id="tsDataAddAforePanel" class="card border-primary-subtle bg-body-tertiary mb-3 d-none ts-data-add-afore-panel">
             <div class="card-body py-3">
-              <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+              <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
                 <div>
                   <div class="fw-semibold"><i class="bi bi-diagram-3 me-1"></i>Agregar AFORE al árbol jerárquico</div>
-                  <div class="small text-muted">Seleccione la serie destino y después elija una AFORE del catálogo. Sus valores se crearán vacíos para evitar datos ficticios.</div>
+                  <div class="small text-muted">Selecciona primero la serie destino y después una AFORE disponible. Los nuevos valores se crearán vacíos.</div>
                 </div>
                 <button type="button" class="btn-close" aria-label="Cerrar" onclick="ts_editorDatosOcultarAgregarAfore()"></button>
               </div>
-              <div class="row g-2 align-items-end">
+              <div class="row g-3 align-items-end">
                 <div class="col-md-5">
                   <label for="tsDataAddAforeSerie" class="form-label small fw-semibold mb-1">Serie destino</label>
                   <select id="tsDataAddAforeSerie" class="form-select form-select-sm" onchange="ts_editorDatosActualizarAforesDisponibles()"></select>
@@ -2775,13 +2962,25 @@
               </div>
             </div>
           </div>
-          <div class="alert alert-light border py-2 small mb-3"><i class="bi bi-shield-check me-1"></i>Los cambios son temporales hasta pulsar <strong>Guardar cambios</strong>. Una celda vacía significa “sin información”; el valor <strong>0</strong> se conserva como cero.</div>
+
+          <div class="ts-data-editor-guidance mb-3">
+            <i class="bi bi-info-circle"></i>
+            <div><strong>Edición segura:</strong> una celda vacía significa “sin información”; el valor <strong>$0.00</strong> se conserva como cero. Puedes escribir cifras sin formato y el sistema las mostrará como moneda al confirmar la celda.</div>
+          </div>
+
+          <div class="ts-data-table-heading">
+            <div>
+              <h6 class="mb-1"><i class="bi bi-table me-2"></i>Series y valores por periodo</h6>
+              <small class="text-muted">Edita las cifras directamente en la tabla. Usa la × para limpiar una celda sin convertirla en cero.</small>
+            </div>
+            <span class="ts-currency-chip"><i class="bi bi-cash-coin me-1"></i>Moneda: MXN</span>
+          </div>
           <div class="table-responsive ts-data-editor-table-wrap"><table class="table table-sm table-bordered align-middle mb-0 ts-data-editor-table"><thead id="tsDataEditorHead"></thead><tbody id="tsDataEditorBody"></tbody></table></div>
         </div>
       </div>
-      <div class="modal-footer d-flex justify-content-between align-items-center">
-        <div class="small text-muted"><i class="bi bi-info-circle me-1"></i>Use Deshacer antes de guardar si necesita recuperar un cambio.</div>
-        <div class="d-flex gap-2">
+      <div class="modal-footer ts-safe-editor-footer d-flex justify-content-between align-items-center">
+        <div class="small text-muted"><i class="bi bi-shield-lock me-1"></i>Los cambios permanecen temporales hasta confirmar el guardado.</div>
+        <div class="d-flex gap-2 ts-safe-editor-footer-actions">
           <button type="button" class="btn btn-outline-secondary" onclick="ts_editorDatosCancelar()">Cancelar</button>
           <button type="button" class="btn btn-primary" onclick="ts_editorDatosGuardar()"><i class="bi bi-check2-circle me-1"></i>Guardar cambios</button>
         </div>
