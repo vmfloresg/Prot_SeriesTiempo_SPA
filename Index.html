@@ -119,25 +119,25 @@
                                         <i class="bi bi-arrow-repeat me-2"></i> Actualizar
                                     </a>
                                 </li>
-                            </ul>
-                        </li>
-                        <li class="nav-item sidebar-submenu-item">
-                            <button class="nav-link w-100 text-start d-flex align-items-center justify-content-between"
-                                    type="button" id="consultasSqlMenuBtn" aria-expanded="false"
-                                    onclick="toggleConsultasSqlSubmenu(event)">
-                                <span><i class="bi bi-database me-2"></i> Consultas SQL</span>
-                                <i class="bi bi-chevron-down submenu-chevron"></i>
-                            </button>
-                            <ul id="consultasSqlSubmenu" class="nav flex-column sidebar-submenu d-none">
-                                <li class="nav-item">
-                                    <a class="nav-link" href="#" data-view="sql-create" data-submenu="consultas-sql">
-                                        <i class="bi bi-plus-circle me-2"></i> Crear Consulta
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="#" data-view="sql-update" data-submenu="consultas-sql">
-                                        <i class="bi bi-arrow-repeat me-2"></i> Actualizar consulta
-                                    </a>
+                                <li class="nav-item sidebar-submenu-item">
+                                    <button class="nav-link w-100 text-start d-flex align-items-center justify-content-between"
+                                            type="button" id="consultasSqlMenuBtn" aria-expanded="false"
+                                            onclick="toggleConsultasSqlSubmenu(event)">
+                                        <span><i class="bi bi-database me-2"></i> Consultas SQL</span>
+                                        <i class="bi bi-chevron-down submenu-chevron"></i>
+                                    </button>
+                                    <ul id="consultasSqlSubmenu" class="nav flex-column sidebar-submenu d-none">
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="#" data-view="sql-create" data-submenu="consultas-sql">
+                                                <i class="bi bi-plus-circle me-2"></i> Crear Consulta
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="#" data-view="sql-update" data-submenu="consultas-sql">
+                                                <i class="bi bi-arrow-repeat me-2"></i> Actualizar consulta
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </li>
                             </ul>
                         </li>
@@ -160,6 +160,46 @@
                             <a class="nav-link" href="#" data-view="users">
                                 <i class="bi bi-people me-2"></i> Administración de usuarios y roles
                             </a>
+                        </li>
+                        <li class="nav-item sidebar-submenu-item">
+                            <button class="nav-link w-100 text-start d-flex align-items-center justify-content-between"
+                                    type="button" id="catalogosMenuBtn" aria-expanded="false"
+                                    onclick="toggleCatalogosSubmenu(event)">
+                                <span><i class="bi bi-collection me-2"></i> Catálogos</span>
+                                <i class="bi bi-chevron-down submenu-chevron"></i>
+                            </button>
+                            <ul id="catalogosSubmenu" class="nav flex-column sidebar-submenu d-none">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#" data-view="catalogo-tipo-cifra" data-submenu="catalogos">
+                                        <i class="bi bi-currency-dollar me-2"></i> Tipo de cifra
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#" data-view="catalogo-periodicidad" data-submenu="catalogos">
+                                        <i class="bi bi-calendar3 me-2"></i> Periodicidad
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#" data-view="catalogo-unidad-medida" data-submenu="catalogos">
+                                        <i class="bi bi-rulers me-2"></i> Unidad de Medida
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#" data-view="catalogo-afore" data-submenu="catalogos">
+                                        <i class="bi bi-building me-2"></i> AFORE
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#" data-view="catalogo-sector" data-submenu="catalogos">
+                                        <i class="bi bi-diagram-3 me-2"></i> Sector
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#" data-view="catalogo-unidad-administrativa" data-submenu="catalogos">
+                                        <i class="bi bi-buildings me-2"></i> Unidades administrativas
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#" data-view="bitacora">
@@ -199,7 +239,7 @@
                     <div class="pw-dashboard-header mb-3">
                         <div>
                             <div class="pw-eyebrow"><i class="bi bi-cloud-arrow-up me-1"></i> Centro de procesamiento</div>
-                            <h4 class="mb-1">Dashboard de carga de archivos</h4>
+                            <h4 class="mb-1">Panel de Control de seguimiento</h4>
                             <p class="text-muted mb-0">Supervisa el periodo, el avance y las actualizaciones pendientes antes de procesar información.</p>
                         </div>
                         <div class="pw-header-status">
@@ -2071,6 +2111,91 @@
                         </div>
                     </div>
 
+                    <!-- Catálogos -->
+                    <div id="catalogo-tipo-cifra" class="app-view d-none catalogo-view" data-catalogo="tipo-cifra">
+                        <div class="catalogo-hero mb-3">
+                            <div><div class="catalogo-eyebrow"><i class="bi bi-collection me-1"></i> Catálogos del sistema</div><h4 class="mb-1">Tipo de cifra</h4><p class="mb-0">Administra los tipos de cifra disponibles para cuadros y series.</p></div>
+                            <button class="btn btn-primary catalogo-nuevo-btn" type="button" data-catalogo-nuevo="tipo-cifra"><i class="bi bi-plus-lg me-1"></i> Nuevo tipo de cifra</button>
+                        </div>
+                        <div class="catalogo-card card border-0 shadow-sm">
+                            <div class="card-body p-0">
+                                <div class="catalogo-toolbar"><div><h6 class="mb-1">Registros</h6><small class="text-muted">Consulta, crea, modifica o elimina elementos del catálogo.</small></div><div class="input-group catalogo-search"><span class="input-group-text"><i class="bi bi-search"></i></span><input id="catalogoBuscar-tipo-cifra" class="form-control" type="search" placeholder="Buscar por clave o nombre..."></div></div>
+                                <div class="table-responsive"><table class="table table-hover align-middle mb-0 catalogo-table"><thead><tr><th>Clave</th><th>Nombre</th><th>Descripción</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead><tbody id="catalogoBody-tipo-cifra"></tbody></table></div>
+                                <div id="catalogoEmpty-tipo-cifra" class="catalogo-empty d-none"><i class="bi bi-inbox"></i><strong>No hay registros para mostrar</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="catalogo-periodicidad" class="app-view d-none catalogo-view" data-catalogo="periodicidad">
+                        <div class="catalogo-hero mb-3">
+                            <div><div class="catalogo-eyebrow"><i class="bi bi-collection me-1"></i> Catálogos del sistema</div><h4 class="mb-1">Periodicidad</h4><p class="mb-0">Administra las periodicidades que pueden utilizar los cuadros y las series de tiempo.</p></div>
+                            <button class="btn btn-primary catalogo-nuevo-btn" type="button" data-catalogo-nuevo="periodicidad"><i class="bi bi-plus-lg me-1"></i> Nueva periodicidad</button>
+                        </div>
+                        <div class="catalogo-card card border-0 shadow-sm">
+                            <div class="card-body p-0">
+                                <div class="catalogo-toolbar"><div><h6 class="mb-1">Registros</h6><small class="text-muted">Consulta, crea, modifica o elimina elementos del catálogo.</small></div><div class="input-group catalogo-search"><span class="input-group-text"><i class="bi bi-search"></i></span><input id="catalogoBuscar-periodicidad" class="form-control" type="search" placeholder="Buscar por clave o nombre..."></div></div>
+                                <div class="table-responsive"><table class="table table-hover align-middle mb-0 catalogo-table"><thead><tr><th>Clave</th><th>Nombre</th><th>Descripción</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead><tbody id="catalogoBody-periodicidad"></tbody></table></div>
+                                <div id="catalogoEmpty-periodicidad" class="catalogo-empty d-none"><i class="bi bi-inbox"></i><strong>No hay registros para mostrar</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="catalogo-unidad-medida" class="app-view d-none catalogo-view" data-catalogo="unidad-medida">
+                        <div class="catalogo-hero mb-3">
+                            <div><div class="catalogo-eyebrow"><i class="bi bi-collection me-1"></i> Catálogos del sistema</div><h4 class="mb-1">Unidad de Medida</h4><p class="mb-0">Administra las unidades de medida disponibles para presentar la información estadística.</p></div>
+                            <button class="btn btn-primary catalogo-nuevo-btn" type="button" data-catalogo-nuevo="unidad-medida"><i class="bi bi-plus-lg me-1"></i> Nueva unidad</button>
+                        </div>
+                        <div class="catalogo-card card border-0 shadow-sm">
+                            <div class="card-body p-0">
+                                <div class="catalogo-toolbar"><div><h6 class="mb-1">Registros</h6><small class="text-muted">Consulta, crea, modifica o elimina elementos del catálogo.</small></div><div class="input-group catalogo-search"><span class="input-group-text"><i class="bi bi-search"></i></span><input id="catalogoBuscar-unidad-medida" class="form-control" type="search" placeholder="Buscar por clave o nombre..."></div></div>
+                                <div class="table-responsive"><table class="table table-hover align-middle mb-0 catalogo-table"><thead><tr><th>Clave</th><th>Nombre</th><th>Descripción</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead><tbody id="catalogoBody-unidad-medida"></tbody></table></div>
+                                <div id="catalogoEmpty-unidad-medida" class="catalogo-empty d-none"><i class="bi bi-inbox"></i><strong>No hay registros para mostrar</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="catalogo-afore" class="app-view d-none catalogo-view" data-catalogo="afore">
+                        <div class="catalogo-hero mb-3">
+                            <div><div class="catalogo-eyebrow"><i class="bi bi-building me-1"></i> Catálogos del sistema</div><h4 class="mb-1">AFORE</h4><p class="mb-0">Administra las AFORE disponibles para asociarlas a cuadros y series de tiempo.</p></div>
+                            <button class="btn btn-primary catalogo-nuevo-btn" type="button" data-catalogo-nuevo="afore"><i class="bi bi-plus-lg me-1"></i> Nueva AFORE</button>
+                        </div>
+                        <div class="catalogo-card card border-0 shadow-sm">
+                            <div class="card-body p-0">
+                                <div class="catalogo-toolbar"><div><h6 class="mb-1">Registros</h6><small class="text-muted">Consulta, crea, modifica o elimina elementos del catálogo.</small></div><div class="input-group catalogo-search"><span class="input-group-text"><i class="bi bi-search"></i></span><input id="catalogoBuscar-afore" class="form-control" type="search" placeholder="Buscar por clave o nombre..."></div></div>
+                                <div class="table-responsive"><table class="table table-hover align-middle mb-0 catalogo-table"><thead><tr><th>Clave</th><th>Nombre</th><th>Descripción</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead><tbody id="catalogoBody-afore"></tbody></table></div>
+                                <div id="catalogoEmpty-afore" class="catalogo-empty d-none"><i class="bi bi-inbox"></i><strong>No hay registros para mostrar</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="catalogo-sector" class="app-view d-none catalogo-view" data-catalogo="sector">
+                        <div class="catalogo-hero mb-3">
+                            <div><div class="catalogo-eyebrow"><i class="bi bi-diagram-3 me-1"></i> Catálogos del sistema</div><h4 class="mb-1">Sector</h4><p class="mb-0">Administra los sectores responsables o relacionados con la información del sistema.</p></div>
+                            <button class="btn btn-primary catalogo-nuevo-btn" type="button" data-catalogo-nuevo="sector"><i class="bi bi-plus-lg me-1"></i> Nuevo sector</button>
+                        </div>
+                        <div class="catalogo-card card border-0 shadow-sm">
+                            <div class="card-body p-0">
+                                <div class="catalogo-toolbar"><div><h6 class="mb-1">Registros</h6><small class="text-muted">Consulta, crea, modifica o elimina elementos del catálogo.</small></div><div class="input-group catalogo-search"><span class="input-group-text"><i class="bi bi-search"></i></span><input id="catalogoBuscar-sector" class="form-control" type="search" placeholder="Buscar por clave o nombre..."></div></div>
+                                <div class="table-responsive"><table class="table table-hover align-middle mb-0 catalogo-table"><thead><tr><th>Clave</th><th>Nombre</th><th>Descripción</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead><tbody id="catalogoBody-sector"></tbody></table></div>
+                                <div id="catalogoEmpty-sector" class="catalogo-empty d-none"><i class="bi bi-inbox"></i><strong>No hay registros para mostrar</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="catalogo-unidad-administrativa" class="app-view d-none catalogo-view" data-catalogo="unidad-administrativa">
+                        <div class="catalogo-hero mb-3">
+                            <div><div class="catalogo-eyebrow"><i class="bi bi-buildings me-1"></i> Catálogos del sistema</div><h4 class="mb-1">Unidades administrativas</h4><p class="mb-0">Administra las unidades administrativas responsables de la información.</p></div>
+                            <button class="btn btn-primary catalogo-nuevo-btn" type="button" data-catalogo-nuevo="unidad-administrativa"><i class="bi bi-plus-lg me-1"></i> Nueva unidad administrativa</button>
+                        </div>
+                        <div class="catalogo-card card border-0 shadow-sm">
+                            <div class="card-body p-0">
+                                <div class="catalogo-toolbar"><div><h6 class="mb-1">Registros</h6><small class="text-muted">Consulta, crea, modifica o elimina elementos del catálogo.</small></div><div class="input-group catalogo-search"><span class="input-group-text"><i class="bi bi-search"></i></span><input id="catalogoBuscar-unidad-administrativa" class="form-control" type="search" placeholder="Buscar por clave o nombre..."></div></div>
+                                <div class="table-responsive"><table class="table table-hover align-middle mb-0 catalogo-table"><thead><tr><th>Clave</th><th>Nombre</th><th>Descripción</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead><tbody id="catalogoBody-unidad-administrativa"></tbody></table></div>
+                                <div id="catalogoEmpty-unidad-administrativa" class="catalogo-empty d-none"><i class="bi bi-inbox"></i><strong>No hay registros para mostrar</strong></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Publicación de cuadros -->
                     <div id="publish" class="app-view d-none">
                         <div class="card p-3">
@@ -2536,6 +2661,7 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="js/modules/catalogos.js"></script>
     <script src="js/modules/series-tiempo.js"></script>
     <script src="js/modules/editor-web.js"></script>
 
@@ -3028,6 +3154,30 @@
         </div>
       </div>
     </div>
+
+
+<!-- Modal CRUD de Catálogos -->
+<div class="modal fade" id="catalogoCrudModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div><div class="catalogo-modal-eyebrow">Administración de catálogo</div><h5 class="modal-title" id="catalogoModalTitulo">Nuevo registro</h5></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="catalogoModalTipo"><input type="hidden" id="catalogoModalId">
+        <div class="row g-3">
+          <div class="col-md-4"><label class="form-label" for="catalogoClave">Clave</label><input id="catalogoClave" class="form-control" maxlength="20" placeholder="Ej. MENS"></div>
+          <div class="col-md-8"><label class="form-label" for="catalogoNombre">Nombre</label><input id="catalogoNombre" class="form-control" maxlength="100" placeholder="Nombre del registro"></div>
+          <div class="col-12"><label class="form-label" for="catalogoDescripcion">Descripción</label><textarea id="catalogoDescripcion" class="form-control" rows="3" maxlength="250" placeholder="Descripción breve"></textarea></div>
+          <div class="col-md-5"><label class="form-label" for="catalogoEstado">Estado</label><select id="catalogoEstado" class="form-select"><option value="activo">Activo</option><option value="inactivo">Inactivo</option></select></div>
+        </div>
+        <div id="catalogoModalError" class="alert alert-danger mt-3 mb-0 d-none"></div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button><button type="button" class="btn btn-primary" id="catalogoGuardarBtn"><i class="bi bi-save me-1"></i> Guardar</button></div>
+    </div>
+  </div>
+</div>
 
 </body>
 

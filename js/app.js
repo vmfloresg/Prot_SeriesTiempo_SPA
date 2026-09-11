@@ -10,6 +10,7 @@ const modulosSistema = [
   { id: 'home', nombre: 'Inicio', descripcion: 'Página de inicio del sistema' },
   { id: 'tables', nombre: 'Cuadros y Series', descripcion: 'Crear y gestionar cuadros y series de tiempo' },
   { id: 'sql-create', nombre: 'Consultas SQL', descripcion: 'Crear y actualizar consultas SQL' },
+  { id: 'catalogos', nombre: 'Catálogos', descripcion: 'Administrar catálogos maestros del sistema' },
   { id: 'panel-web', nombre: 'Carga de archivos', descripcion: 'Carga de archivos, editor y administración integrados' },
   { id: 'publish', nombre: 'Publicación de cuadros', descripcion: 'Publicar cuadros para visualización' },
   { id: 'editor', nombre: 'Editor de páginas web', descripcion: 'Editor para crear y modificar páginas' },
@@ -19,9 +20,9 @@ const modulosSistema = [
 ];
 
 let roles = [
-  { id: 1, nombre: 'admin', descripcion: 'Administrador del sistema', permisos: { home:['R','W','Q'], upload:['R','W','Q'], tables:['R','W','Q'], 'panel-web':['R','W','Q'], publish:['R','W','Q'], editor:['R','W','Q'], reports:['R','W','Q'], users:['R','W','Q'], bitacora:['R','W','Q'] } },
-  { id: 2, nombre: 'usuario', descripcion: 'Usuario normal', permisos: { home:['R'], upload:['R','W'], tables:['R','W'], 'panel-web':['R','W'], publish:['R'], editor:['R'], reports:['R','Q'], users:[], bitacora:['R'] } },
-  { id: 3, nombre: 'lector', descripcion: 'Solo lectura', permisos: { home:['R'], upload:['R'], tables:['R'], 'panel-web':['R'], publish:['R'], editor:['R'], reports:['R'], users:[], bitacora:['R'] } }
+  { id: 1, nombre: 'admin', descripcion: 'Administrador del sistema', permisos: { home:['R','W','Q'], upload:['R','W','Q'], tables:['R','W','Q'], 'panel-web':['R','W','Q'], catalogos:['R','W','Q'], publish:['R','W','Q'], editor:['R','W','Q'], reports:['R','W','Q'], users:['R','W','Q'], bitacora:['R','W','Q'] } },
+  { id: 2, nombre: 'usuario', descripcion: 'Usuario normal', permisos: { home:['R'], upload:['R','W'], tables:['R','W'], 'panel-web':['R','W'], catalogos:['R','W'], publish:['R'], editor:['R'], reports:['R','Q'], users:[], bitacora:['R'] } },
+  { id: 3, nombre: 'lector', descripcion: 'Solo lectura', permisos: { home:['R'], upload:['R'], tables:['R'], 'panel-web':['R'], catalogos:['R'], publish:['R'], editor:['R'], reports:['R'], users:[], bitacora:['R'] } }
 ];
 
 let reportes = [
@@ -618,6 +619,18 @@ function toggleConsultasSqlSubmenu(event){
   btn.classList.toggle('submenu-open', abrir);
 }
 
+function toggleCatalogosSubmenu(event){
+  event?.preventDefault();
+  event?.stopPropagation();
+  const menu=document.getElementById('catalogosSubmenu');
+  const btn=document.getElementById('catalogosMenuBtn');
+  if(!menu || !btn) return;
+  const abrir=menu.classList.contains('d-none');
+  menu.classList.toggle('d-none', !abrir);
+  btn.setAttribute('aria-expanded', abrir ? 'true' : 'false');
+  btn.classList.toggle('submenu-open', abrir);
+}
+
 document.querySelectorAll('[data-view]').forEach(a=>a.addEventListener('click',e=>{
   e.preventDefault();
   const target=a.getAttribute('data-view');
@@ -632,8 +645,20 @@ document.querySelectorAll('[data-view]').forEach(a=>a.addEventListener('click',e
     btn?.classList.add('submenu-open');
   }
   if(a.getAttribute('data-submenu') === 'consultas-sql'){
+    const parentSubmenu=document.getElementById('cuadrosSeriesSubmenu');
+    const parentBtn=document.getElementById('cuadrosSeriesMenuBtn');
+    parentSubmenu?.classList.remove('d-none');
+    parentBtn?.setAttribute('aria-expanded','true');
+    parentBtn?.classList.add('submenu-open');
     const submenu=document.getElementById('consultasSqlSubmenu');
     const btn=document.getElementById('consultasSqlMenuBtn');
+    submenu?.classList.remove('d-none');
+    btn?.setAttribute('aria-expanded','true');
+    btn?.classList.add('submenu-open');
+  }
+  if(a.getAttribute('data-submenu') === 'catalogos'){
+    const submenu=document.getElementById('catalogosSubmenu');
+    const btn=document.getElementById('catalogosMenuBtn');
     submenu?.classList.remove('d-none');
     btn?.setAttribute('aria-expanded','true');
     btn?.classList.add('submenu-open');
@@ -693,6 +718,10 @@ function showView(view){
     window.renderConsultasSqlPage?.();
   }
 
+  if(view && view.startsWith('catalogo-')) {
+    window.CatalogosCRUD?.renderPorVista?.(view);
+  }
+
   const titleMap={
     home:'Inicio',
     upload:'Carga de archivos',
@@ -700,6 +729,12 @@ function showView(view){
     'tables-update':'Cuadros y Series - Actualizar',
     'sql-create':'Consultas SQL - Crear Consulta',
     'sql-update':'Consultas SQL - Actualizar consulta',
+    'catalogo-tipo-cifra':'Catálogos - Tipo de cifra',
+    'catalogo-periodicidad':'Catálogos - Periodicidad',
+    'catalogo-unidad-medida':'Catálogos - Unidad de Medida',
+    'catalogo-afore':'Catálogos - AFORE',
+    'catalogo-sector':'Catálogos - Sector',
+    'catalogo-unidad-administrativa':'Catálogos - Unidades administrativas',
     'panel-web':'Carga de archivos',
     publish:'Publicación de cuadros',
     editor:'Editor de páginas web',
