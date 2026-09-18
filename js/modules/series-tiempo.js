@@ -3235,7 +3235,7 @@ function ts_crudRecolectarFormulario() {
         },
         configuracionSerie: ts_crudClonar(ts_configuracionSerie) || {},
         seriesDatos: ts_crudClonar(ts_seriesDatos) || [],
-        vinculosSeriesCuadros: ts_crudClonar(ts_vinculosSeriesCuadros) || {},
+        vinculosSeriesCuadros: ts_crudIdActual ? (ts_crudClonar(ts_vinculosSeriesCuadros) || {}) : {},
         periodosDatos: ts_crudClonar(ts_periodosDatos) || [],
         valoresDatos: ts_crudClonar(ts_valoresDatos) || {},
         siguienteSerieId: ts_siguienteSerieId,
@@ -3778,6 +3778,17 @@ function ts_crudActualizarEstado() {
     if (boton) boton.innerHTML = edicion
         ? '<i class="bi bi-save me-1"></i> Actualizar'
         : '<i class="bi bi-save me-1"></i> Guardar';
+
+    // En Crear, las nuevas series pertenecen al nuevo cuadro que el sistema asigna
+    // automáticamente. La vinculación con cuadros existentes sólo aplica al editar.
+    const vinculosAccordion = document.getElementById("tsVinculosAccordion");
+    if (vinculosAccordion) vinculosAccordion.classList.toggle("d-none", !edicion);
+
+    const autoInfo = document.getElementById("tsAutoCuadroInfo");
+    const autoClave = document.getElementById("tsAutoCuadroClave");
+    if (autoInfo) autoInfo.classList.toggle("d-none", edicion);
+    if (autoClave && !edicion) autoClave.textContent = ts_crudGenerarId();
+
     ts_crudActualizarContador();
 }
 

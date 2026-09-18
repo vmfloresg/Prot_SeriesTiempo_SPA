@@ -18,6 +18,14 @@
 </div>
 </div>
 
+<div class="alert alert-primary d-flex align-items-start gap-2 py-2 px-3 mb-3 ts-auto-cuadro-info" id="tsAutoCuadroInfo" role="status">
+  <i class="bi bi-hash fs-5"></i>
+  <div>
+    <strong>Cuadro asignado automáticamente: <span id="tsAutoCuadroClave">—</span></strong>
+    <div class="small">Al crear nuevas series no es necesario vincularlas con un cuadro existente. El sistema asignará automáticamente el siguiente número consecutivo de cuadro.</div>
+  </div>
+</div>
+
 <div class="ts-create-flow" aria-label="Flujo de creación de cuadros y series">
   <div class="ts-flow-item is-active">
     <span class="ts-flow-icon"><i class="bi bi-sliders"></i></span>
@@ -590,7 +598,7 @@
                     <!-- ================================================= -->
                     <!-- 4. VINCULACION CON CUADROS CONSUMIDORES -->
                     <!-- ================================================= -->
-                    <div class="accordion-item ts-link-accordion">
+                    <div class="accordion-item ts-link-accordion" id="tsVinculosAccordion">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#sectionLinks">
